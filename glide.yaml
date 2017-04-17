@@ -1,0 +1,9 @@
+package: gitlab.com/littledot/mockhiato
+import:
+- package: github.com/spf13/cobra
+  subpackages:
+  - cobra
+- package: github.com/davecgh/go-spew
+  version: v1.1.0
+  subpackages:
+  - spew
