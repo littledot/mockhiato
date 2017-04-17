@@ -13,11 +13,12 @@ import (
 	"github.com/davecgh/go-spew/spew"
 )
 
-type Gen struct {
+// Oracle parses Go projects, looking for interfaces to mock.
+type Oracle struct {
 }
 
 func Run() {
-	gen := &Gen{}
+	gen := &Oracle{}
 	sources := gen.scanFiles()
 	spew.Dump(sources)
 	// gen.parseFile(sources)
@@ -29,7 +30,7 @@ type scanResult struct {
 	sources []string
 }
 
-func (r *Gen) scanFiles() *scanResult {
+func (r *Oracle) scanFiles() *scanResult {
 	wd, err := os.Getwd()
 	if err != nil {
 		panic(err)
@@ -77,7 +78,7 @@ type AstFunction struct {
 	Name string
 }
 
-func (r *Gen) parseFile(scan *scanResult) {
+func (r *Oracle) parseFile(scan *scanResult) {
 	fset := token.NewFileSet()
 	for _, source := range scan.sources {
 		f, err := parser.ParseFile(fset, source, nil, parser.AllErrors)
@@ -121,7 +122,7 @@ type typeResult struct {
 	iface  *types.Interface
 }
 
-func (r *Gen) loader(scan *scanResult) *loaderResult {
+func (r *Oracle) loader(scan *scanResult) *loaderResult {
 	cfg := &types.Config{
 		Importer: importer.Default(),
 	}
@@ -176,7 +177,7 @@ func (r *Gen) loader(scan *scanResult) *loaderResult {
 	}
 }
 
-func (r *Gen) gen(loaded *loaderResult) {
+func (r *Oracle) gen(loaded *loaderResult) {
 	for _, load := range loaded.types {
 		spew.Dump(types.ObjectString(load.object, nil))
 		spew.Dump(types.TypeString(load.iface, nil))
