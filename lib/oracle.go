@@ -69,50 +69,6 @@ func (r *Oracle) scanFiles() *scanResult {
 	return result
 }
 
-type AstInterface struct {
-	Name    string
-	Methods []*AstFunction
-}
-
-type AstFunction struct {
-	Name string
-}
-
-func (r *Oracle) parseFile(scan *scanResult) {
-	fset := token.NewFileSet()
-	for _, source := range scan.sources {
-		f, err := parser.ParseFile(fset, source, nil, parser.AllErrors)
-		if err != nil {
-			panic(err)
-		}
-		ast.Print(fset, f)
-
-		ast.Inspect(f, func(node ast.Node) bool {
-			if genDecl, ok := node.(*ast.GenDecl); ok {
-				if genDecl.Tok == token.TYPE {
-					if typeSpec, ok := genDecl.Specs[0].(*ast.TypeSpec); ok {
-						if interfaceType, ok := typeSpec.Type.(*ast.InterfaceType); ok {
-							astInterface := &AstInterface{}
-							astInterface.Name = typeSpec.Name.Name
-							spew.Dump("iface:", astInterface.Name)
-
-							for _, method := range interfaceType.Methods.List {
-								astFunction := &AstFunction{}
-								astFunction.Name = method.Names[0].Name
-								astInterface.Methods = append(astInterface.Methods, astFunction)
-								spew.Dump("meth:", astFunction.Name)
-							}
-							spew.Dump(astInterface)
-							return false
-						}
-					}
-				}
-			}
-			return true
-		})
-	}
-}
-
 type loaderResult struct {
 	types []*typeResult
 }
