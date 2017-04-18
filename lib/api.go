@@ -2,6 +2,11 @@ package lib
 
 import "go/types"
 
+type Config struct {
+	ProjectPath string   `yaml:"ProjectPath"`
+	IgnorePaths []string `yaml:"IgnorePaths"`
+}
+
 type Formatter interface {
 	GenerateMocks(spec *Spec)
 }

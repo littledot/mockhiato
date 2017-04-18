@@ -7,39 +7,82 @@ import (
 	"go/parser"
 	"go/token"
 	"go/types"
+	"io/ioutil"
 	"os"
 	"path/filepath"
 	"strings"
 
+	"github.com/davecgh/go-spew/spew"
 	"gitlab.com/littledot/mockhiato/lib"
 	"gitlab.com/littledot/mockhiato/lib/plugin/github.com/stretchr/testify"
-
-	"github.com/davecgh/go-spew/spew"
+	"gopkg.in/yaml.v2"
 )
 
 func Run() {
-	projectPath, err := os.Getwd()
+	oracle := NewOracle()
+	project := oracle.ScanProject()
+	spew.Dump(project)
+	spec := oracle.TypeCheckProject(project)
+	oracle.GenerateMocks(spec)
+}
+
+// newDefaultConfig provides default behavior
+func newDefaultConfig() *lib.Config {
+	wd, err := os.Getwd()
 	if err != nil {
 		panic(err)
 	}
+	return &lib.Config{
+		ProjectPath: wd,
+		IgnorePaths: []string{"vendor"},
+	}
+}
 
-	oracle := &Oracle{}
-	oracle.Formatter = testify.NewTestifyFormatter()
+func NewConfig() *lib.Config {
+	config := newDefaultConfig()
+	parseConfigYaml(config)
 
-	project := oracle.ScanProject(projectPath)
-	spec := oracle.TypeCheckProject(project)
-	oracle.GenerateMocks(spec)
+	spew.Dump(config)
+	return config
+}
+
+func parseConfigYaml(config *lib.Config) {
+	// Unmarshal config yaml
+	configFile, err := os.Open("mockhiato.yaml")
+	if err != nil {
+		return
+	}
+	defer configFile.Close()
+
+	configBytes, err := ioutil.ReadAll(configFile)
+	if err != nil {
+		return
+	}
+	if err := yaml.Unmarshal(configBytes, config); err != nil {
+		return
+	}
 }
 
 // Oracle parses Go projects, looking for interfaces to mock.
 type Oracle struct {
 	lib.Formatter
+
+	config *lib.Config
+}
+
+func NewOracle() *Oracle {
+	config := NewConfig()
+	oracle := &Oracle{
+		Formatter: testify.NewTestifyFormatter(),
+		config:    config,
+	}
+	return oracle
 }
 
 // ScanProject walks the project directory, indexing valid Go source code
-func (r *Oracle) ScanProject(projectPath string) *lib.Project {
+func (r *Oracle) ScanProject() *lib.Project {
 	project := lib.NewProject()
-	err := filepath.Walk(projectPath, func(filePath string, info os.FileInfo, err error) error {
+	err := filepath.Walk(r.config.ProjectPath, func(filePath string, info os.FileInfo, err error) error {
 		if err != nil { // Something wrong? Skip
 			return nil
 		}
@@ -50,12 +93,15 @@ func (r *Oracle) ScanProject(projectPath string) *lib.Project {
 			return nil
 		}
 
-		rel, err := filepath.Rel(projectPath, filePath)
+		relPath, err := filepath.Rel(r.config.ProjectPath, filePath)
 		if err != nil {
 			return nil
 		}
-		if strings.HasPrefix(rel, "vendor") { // Vendor directories? Skip TODO: make this configurable
-			return filepath.SkipDir
+		for _, ignorePath := range r.config.IgnorePaths {
+			if strings.HasPrefix(relPath, ignorePath) { // Vendor directories? Skip
+				spew.Dump(relPath)
+				return filepath.SkipDir
+			}
 		}
 
 		// Check source for Mockhiato magic string

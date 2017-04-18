@@ -1,5 +1,5 @@
-hash: d4f003af8eb38a0808280e6501a25dc96ac37d0843b12e71c0e2df81b4c7dcc1
-updated: 2017-04-14T14:28:37.243459688-07:00
+hash: 3742793b38864f1d9d658bcd08822a74ab761ae7e4164d0f726df65e7ac72585
+updated: 2017-04-18T12:30:03.47377655-07:00
 imports:
 - name: github.com/davecgh/go-spew
   version: 346938d642f2ec3594ed81d874461961cd0faa76
@@ -28,6 +28,10 @@ imports:
   version: c37440a7cf42ac63b919c752ca73a85067e05992
 - name: github.com/pelletier/go-toml
   version: fe206efb84b2bc8e8cfafe6b4c1826622be969e3
+- name: github.com/pmezard/go-difflib
+  version: 792786c7400a136282c1664665ae0a8db921c6c2
+  subpackages:
+  - difflib
 - name: github.com/spf13/afero
   version: 9be650865eab0c12963d8753212f4f9c66cdcf12
   subpackages:
@@ -35,15 +39,22 @@ imports:
 - name: github.com/spf13/cast
   version: acbeb36b902d72a7a4c18e8f3241075e7ab763e4
 - name: github.com/spf13/cobra
-  version: 5deb57bbca49eb370538fc295ba4b2988f9f5e09
+  version: b6cb3958937245a12d4d7728be080a6c758f4136
   subpackages:
   - cobra
 - name: github.com/spf13/jwalterweatherman
   version: fa7ca7e836cf3a8bb4ebf799f472c12d7e903d66
 - name: github.com/spf13/pflag
-  version: e453343e6260b4a3a89f1f0e10a2fbb07f8d9750
+  version: 2300d0f8576fe575f71aaa5b9bbe4e1b0dc2eb51
 - name: github.com/spf13/viper
-  version: 5d46e70da8c0b6f812e0b170b7a985753b5c63cb
+  version: 0967fc9aceab2ce9da34061253ac10fb99bba5b2
+- name: github.com/stretchr/objx
+  version: 1a9d0bb9f541897e62256577b352fdbc1fb4fd94
+- name: github.com/stretchr/testify
+  version: f390dcf405f7b83c997eac1b06768bb9f44dec18
+  subpackages:
+  - assert
+  - mock
 - name: golang.org/x/sys
   version: 99f16d856c9836c42d24e7ab64ea72916925fa97
   subpackages:

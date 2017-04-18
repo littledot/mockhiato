@@ -7,3 +7,4 @@ import:
   version: v1.1.0
   subpackages:
   - spew
+- package: gopkg.in/yaml.v2
