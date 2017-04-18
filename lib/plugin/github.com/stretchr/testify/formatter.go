@@ -99,7 +99,7 @@ func (r *testifyFormatter) generateMock(pack *lib.Package) {
 			commentLine := fmt.Sprintf("// %s implements (%s.%s).%s\n", method.Name(), pkgName, interfaceName, method.Name())
 			signatureLine := fmt.Sprintf("func (r *%s) %s(%s) (%s) {\n", interfaceName, method.Name(), strings.Join(paramExprs, ", "), strings.Join(returnTypes, ","))
 			verifyInvokedLine := fmt.Sprintf("r.Called(%s)\n", strings.Join(paramNames, ", "))
-			if signature.Params().Len() > 0 {
+			if signature.Results().Len() > 0 {
 				verifyInvokedLine = "ret := " + verifyInvokedLine
 			}
 			returnLine := fmt.Sprintf("return %s\n}\n", strings.Join(returnNames, ", "))
