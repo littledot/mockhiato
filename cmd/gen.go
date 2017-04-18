@@ -16,7 +16,7 @@ package cmd
 
 import (
 	"github.com/spf13/cobra"
-	"gitlab.com/littledot/mockhiato/lib"
+	"gitlab.com/littledot/mockhiato/lib/generate"
 )
 
 // genCmd represents the gen command
@@ -31,7 +31,7 @@ This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		// TODO: Work your own magic here
-		lib.Run()
+		generate.Run()
 	},
 }
 
