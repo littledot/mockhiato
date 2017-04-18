@@ -1,6 +1,9 @@
 package lib
 
-import "go/types"
+import (
+	"go/types"
+	"os"
+)
 
 type Config struct {
 	ProjectPath string   `yaml:"ProjectPath"`
@@ -9,6 +12,7 @@ type Config struct {
 
 type Formatter interface {
 	GenerateMocks(spec *Spec)
+	IsMockFile(file *os.File) bool
 }
 
 type Project struct {
