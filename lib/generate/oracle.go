@@ -133,14 +133,14 @@ func (r *Oracle) ScanProject() *lib.Project {
 
 func (r *Oracle) TypeCheckProject(project *lib.Project) *lib.Spec {
 	spec := &lib.Spec{}
-	for _, sources := range project.SourceSet {
-		pack := r.typeCheckSources(sources)
+	for dir, sources := range project.SourceSet {
+		pack := r.typeCheckSources(dir, sources)
 		spec.Packages = append(spec.Packages, pack)
 	}
 	return spec
 }
 
-func (r *Oracle) typeCheckSources(sources []string) *lib.Package {
+func (r *Oracle) typeCheckSources(dir string, sources []string) *lib.Package {
 	// Build package AST from sources
 	fset := token.NewFileSet()
 	astFiles := []*ast.File{}
@@ -160,7 +160,7 @@ func (r *Oracle) typeCheckSources(sources []string) *lib.Package {
 		Defs: map[*ast.Ident]types.Object{},
 		Uses: map[*ast.Ident]types.Object{},
 	}
-	if _, err := typeChecker.Check("", fset, astFiles, info); err != nil {
+	if _, err := typeChecker.Check(dir, fset, astFiles, info); err != nil {
 		panic(err)
 	}
 

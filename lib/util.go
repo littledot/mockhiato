@@ -4,12 +4,9 @@ import (
 	"bytes"
 	"go/types"
 	"strings"
-
-	"github.com/davecgh/go-spew/spew"
 )
 
 func GetTypeString(obj types.Object) string {
-	spew.Dump(obj.Type())
 	buf := &bytes.Buffer{}
 	getTypeString(buf, obj.Type())
 	return buf.String()
