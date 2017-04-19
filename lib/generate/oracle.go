@@ -43,8 +43,12 @@ func NewOracle(config lib.Config) *Oracle {
 
 // ScanProject walks the project directory, indexing valid Go source code
 func (r *Oracle) ScanProject() *lib.Project {
+	projectPath, err := filepath.Abs(r.config.ProjectPath)
+	if err != nil {
+		panic(err)
+	}
 	project := lib.NewProject()
-	err := filepath.Walk(r.config.ProjectPath, func(filePath string, info os.FileInfo, err error) error {
+	err = filepath.Walk(projectPath, func(filePath string, info os.FileInfo, err error) error {
 		if err != nil { // Something wrong? Skip
 			return nil
 		}
@@ -55,7 +59,7 @@ func (r *Oracle) ScanProject() *lib.Project {
 			return nil
 		}
 
-		relPath, err := filepath.Rel(r.config.ProjectPath, filePath)
+		relPath, err := filepath.Rel(projectPath, filePath)
 		if err != nil {
 			return nil
 		}
@@ -74,8 +78,8 @@ func (r *Oracle) ScanProject() *lib.Project {
 			return nil
 		}
 
-		dirPath := filepath.Dir(filePath)
-		project.SourceSet[dirPath] = append(project.SourceSet[dirPath], filePath)
+		packagePath := strings.Split(filepath.Dir(filePath), "src/")[1]
+		project.SourceSet[packagePath] = append(project.SourceSet[packagePath], filePath)
 		return nil
 	})
 	if err != nil {
@@ -86,19 +90,19 @@ func (r *Oracle) ScanProject() *lib.Project {
 
 func (r *Oracle) TypeCheckProject(project *lib.Project) *lib.Spec {
 	spec := &lib.Spec{}
-	for dir, sources := range project.SourceSet {
-		pack := r.typeCheckSources(dir, sources)
+	for packagePath, sourcePaths := range project.SourceSet {
+		pack := r.typeCheckSources(packagePath, sourcePaths)
 		spec.Packages = append(spec.Packages, pack)
 	}
 	return spec
 }
 
-func (r *Oracle) typeCheckSources(dir string, sources []string) *lib.Package {
+func (r *Oracle) typeCheckSources(packagePath string, sourcePaths []string) *lib.Package {
 	// Build package AST from sources
 	fset := token.NewFileSet()
 	astFiles := []*ast.File{}
-	for _, source := range sources {
-		astFile, err := parser.ParseFile(fset, source, nil, parser.AllErrors)
+	for _, sourcePath := range sourcePaths {
+		astFile, err := parser.ParseFile(fset, sourcePath, nil, parser.AllErrors)
 		if err != nil {
 			panic(err)
 		}
@@ -106,13 +110,11 @@ func (r *Oracle) typeCheckSources(dir string, sources []string) *lib.Package {
 	}
 
 	// Type-check package AST
-	typeChecker := &types.Config{
-		Importer: importer.Default(),
-	}
-	info := &types.Info{
-		Defs: map[*ast.Ident]types.Object{},
-	}
-	tPackage, err := typeChecker.Check(dir, fset, astFiles, info)
+	typeChecker := &types.Config{}
+	typeChecker.Importer = importer.Default()
+	info := &types.Info{}
+	info.Defs = map[*ast.Ident]types.Object{}
+	tPackage, err := typeChecker.Check(packagePath, fset, astFiles, info)
 	if err != nil {
 		panic(err)
 	}
