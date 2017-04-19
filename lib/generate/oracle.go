@@ -10,6 +10,8 @@ import (
 	"path/filepath"
 	"strings"
 
+	"golang.org/x/tools/go/types/typeutil"
+
 	"github.com/davecgh/go-spew/spew"
 	"gitlab.com/littledot/mockhiato/lib"
 	"gitlab.com/littledot/mockhiato/lib/plugin/github.com/stretchr/testify"
@@ -109,13 +111,16 @@ func (r *Oracle) typeCheckSources(dir string, sources []string) *lib.Package {
 	}
 	info := &types.Info{
 		Defs: map[*ast.Ident]types.Object{},
-		Uses: map[*ast.Ident]types.Object{},
 	}
-	if _, err := typeChecker.Check(dir, fset, astFiles, info); err != nil {
+	tPackage, err := typeChecker.Check(dir, fset, astFiles, info)
+	if err != nil {
 		panic(err)
 	}
 
 	pack := &lib.Package{}
+
+	// Index imports used by the package
+	pack.Imports = typeutil.Dependencies(tPackage)
 
 	// Index interfaces defined in the package
 	for _, def := range info.Defs {
@@ -135,15 +140,6 @@ func (r *Oracle) typeCheckSources(dir string, sources []string) *lib.Package {
 			Interface: interfaceDef,
 		}
 		pack.Interfaces = append(pack.Interfaces, iface)
-	}
-
-	// Index imports used by the package
-	for _, use := range info.Uses {
-		pkgNameUse, ok := use.(*types.PkgName)
-		if !ok {
-			continue
-		}
-		pack.Imports = append(pack.Imports, pkgNameUse.Imported())
 	}
 
 	return pack
