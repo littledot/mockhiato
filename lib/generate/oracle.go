@@ -6,7 +6,6 @@ import (
 	"go/parser"
 	"go/token"
 	"go/types"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"strings"
@@ -14,53 +13,15 @@ import (
 	"github.com/davecgh/go-spew/spew"
 	"gitlab.com/littledot/mockhiato/lib"
 	"gitlab.com/littledot/mockhiato/lib/plugin/github.com/stretchr/testify"
-	"gopkg.in/yaml.v2"
 )
 
-func Run() {
-	oracle := NewOracle()
+func Run(config lib.Config) {
+	oracle := NewOracle(config)
 	project := oracle.ScanProject()
 	spew.Dump(project)
 	spec := oracle.TypeCheckProject(project)
 	spew.Dump(spec)
 	oracle.GenerateMocks(spec)
-}
-
-// newDefaultConfig provides default behavior
-func newDefaultConfig() *lib.Config {
-	wd, err := os.Getwd()
-	if err != nil {
-		panic(err)
-	}
-	return &lib.Config{
-		ProjectPath: wd,
-		IgnorePaths: []string{"vendor"},
-	}
-}
-
-func NewConfig() *lib.Config {
-	config := newDefaultConfig()
-	parseConfigYaml(config)
-
-	spew.Dump(config)
-	return config
-}
-
-func parseConfigYaml(config *lib.Config) {
-	// Unmarshal config yaml
-	configFile, err := os.Open("mockhiato.yaml")
-	if err != nil {
-		return
-	}
-	defer configFile.Close()
-
-	configBytes, err := ioutil.ReadAll(configFile)
-	if err != nil {
-		return
-	}
-	if err := yaml.Unmarshal(configBytes, config); err != nil {
-		return
-	}
 }
 
 // Oracle parses Go projects, looking for interfaces to mock.
@@ -70,8 +31,7 @@ type Oracle struct {
 	config lib.Config
 }
 
-func NewOracle() *Oracle {
-	config := *NewConfig()
+func NewOracle(config lib.Config) *Oracle {
 	oracle := &Oracle{
 		Formatter: testify.NewTestifyFormatter(config),
 		config:    config,

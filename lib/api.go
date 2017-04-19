@@ -6,8 +6,9 @@ import (
 )
 
 type Config struct {
-	ProjectPath string   `yaml:"ProjectPath"`
-	IgnorePaths []string `yaml:"IgnorePaths"`
+	Verbose     bool
+	ProjectPath string   `mapstructure:"project-path"`
+	IgnorePaths []string `mapstructure:"ignore-paths"`
 }
 
 type Formatter interface {
