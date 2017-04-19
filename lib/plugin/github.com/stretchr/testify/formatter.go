@@ -26,7 +26,12 @@ func NewTestifyFormatter(config lib.Config) lib.Formatter {
 }
 
 type testifyFormatter struct {
-	config lib.Config
+	config         lib.Config
+	projectPackage string
+}
+
+func (r *testifyFormatter) SetProjectPackage(projectPackage string) {
+	r.projectPackage = projectPackage
 }
 
 func (r *testifyFormatter) IsMockFile(file *os.File) bool {
@@ -75,9 +80,10 @@ func (r *testifyFormatter) generateMock(pack *lib.Package) {
 	buf.WriteString(magic + "\n")
 
 	// Write imports
+	vendorPath := r.projectPackage + "/vendor/"
 	imports := []string{`"github.com/stretchr/testify/mock"`}
-	for _, imported := range pack.Imports {
-		imports = append(imports, strconv.Quote(imported.Path()))
+	for _, tImport := range pack.Imports {
+		imports = append(imports, strconv.Quote(strings.TrimPrefix(tImport.Path(), vendorPath)))
 	}
 	buf.WriteString("import(\n")
 	buf.WriteString(strings.Join(imports, "\n"))
@@ -100,7 +106,7 @@ func (r *testifyFormatter) generateMock(pack *lib.Package) {
 				param := signature.Params().At(j)
 				varName := "p" + strconv.Itoa(j)
 				paramNames = append(paramNames, varName)
-				paramExprs = append(paramExprs, varName+" "+lib.GetTypeString(param))
+				paramExprs = append(paramExprs, varName+" "+lib.TObjectTypeToString(param))
 			}
 
 			if signature.Variadic() { // Variadic method? Replace last parameter's [] with ... ("p1 []int" -> "p1 ...int")
@@ -115,8 +121,8 @@ func (r *testifyFormatter) generateMock(pack *lib.Package) {
 				result := signature.Results().At(j)
 				varName := "ret" + strconv.Itoa(j)
 				returnNames = append(returnNames, varName)
-				returnTypes = append(returnTypes, lib.GetTypeString(result))
-				verifyReturnLines = append(verifyReturnLines, fmt.Sprintf("%s := ret.Get(%d).(%s)\n", varName, j, lib.GetTypeString(result)))
+				returnTypes = append(returnTypes, lib.TObjectTypeToString(result))
+				verifyReturnLines = append(verifyReturnLines, fmt.Sprintf("%s := ret.Get(%d).(%s)\n", varName, j, lib.TObjectTypeToString(result)))
 			}
 
 			commentLine := fmt.Sprintf("// %s implements (%s.%s).%s\n", method.Name(), pkgName, interfaceName, method.Name())
@@ -143,7 +149,7 @@ func (r *testifyFormatter) generateMock(pack *lib.Package) {
 
 	// Format generated code
 	cmd := exec.Command("goimports", "-w", mockPath)
-	if stdout, e := cmd.CombinedOutput(); e != nil {
-		panic(stdout)
+	if stdout, err := cmd.CombinedOutput(); err != nil {
+		panic(string(stdout))
 	}
 }

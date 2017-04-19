@@ -13,6 +13,7 @@ type Config struct {
 }
 
 type Formatter interface {
+	SetProjectPackage(projectPackage string)
 	GenerateMocks(spec *Spec)
 	IsMockFile(file *os.File) bool
 }

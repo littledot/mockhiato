@@ -47,6 +47,8 @@ func (r *Oracle) ScanProject() *lib.Project {
 	if err != nil {
 		panic(err)
 	}
+	r.Formatter.SetProjectPackage(strings.Split(projectPath, "src/")[1])
+
 	project := lib.NewProject()
 	err = filepath.Walk(projectPath, func(filePath string, info os.FileInfo, err error) error {
 		if err != nil { // Something wrong? Skip
