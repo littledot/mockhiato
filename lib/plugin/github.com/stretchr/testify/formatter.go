@@ -7,6 +7,7 @@ import (
 	"go/types"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"strconv"
 	"strings"
 
@@ -19,7 +20,9 @@ const (
 
 // NewTestifyFormatter creates a new testifyFormatter
 func NewTestifyFormatter(config lib.Config) lib.Formatter {
-	return &testifyFormatter{}
+	return &testifyFormatter{
+		config: config,
+	}
 }
 
 type testifyFormatter struct {
@@ -52,11 +55,11 @@ func (r *testifyFormatter) generateMock(pack *lib.Package) {
 	}
 
 	// Create file {package_name}_mocks.go
-	if err := os.MkdirAll("mocks", os.ModeDir); err != nil {
+	if err := os.MkdirAll(r.config.OutputPath, 0755); err != nil {
 		panic(err)
 	}
 	pkgName := pack.Interfaces[0].Object.Pkg().Name()
-	mockPath := fmt.Sprintf("mocks/%s_mocks.go", strings.Replace(pkgName, "/", "_", -1))
+	mockPath := fmt.Sprintf("%s/%s_mocks.go", r.config.OutputPath, pkgName)
 	mockFile, err := os.Create(mockPath)
 	if err != nil {
 		panic(err)
@@ -66,7 +69,7 @@ func (r *testifyFormatter) generateMock(pack *lib.Package) {
 	buf := &bytes.Buffer{}
 
 	// Write package
-	buf.WriteString("package mocks\n")
+	buf.WriteString(fmt.Sprintf("package %s\n", filepath.Base(r.config.OutputPath)))
 
 	// Write magic string
 	buf.WriteString(magic + "\n")

@@ -15,6 +15,7 @@
 package cmd
 
 import (
+	"github.com/davecgh/go-spew/spew"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"gitlab.com/littledot/mockhiato/lib"
@@ -34,6 +35,7 @@ var generateCmd = &cobra.Command{
 		if err := viper.Unmarshal(&config); err != nil {
 			panic(err)
 		}
+		spew.Dump(config)
 		generate.Run(config)
 	},
 }
@@ -41,6 +43,7 @@ var generateCmd = &cobra.Command{
 func init() {
 	RootCmd.AddCommand(generateCmd)
 
-	generateCmd.Flags().StringP("project-path", "p", ".", "Project root path")
-	generateCmd.Flags().StringSliceP("ignore-paths", "i", []string{"vendor"}, "Ignore paths")
+	generateCmd.Flags().StringP("ProjectPath", "p", ".", "Project root path")
+	generateCmd.Flags().StringSliceP("IgnorePaths", "i", []string{"vendor"}, "Ignore paths")
+	generateCmd.Flags().StringP("OutputPath", "o", "mocks", "Output path")
 }

@@ -53,7 +53,7 @@ func init() {
 	RootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.mockhiato.yaml)")
 	// Cobra also supports local flags, which will only run
 	// when this action is called directly.
-	RootCmd.PersistentFlags().BoolP("verbose", "v", false, "Make some noise!")
+	RootCmd.PersistentFlags().BoolP("Verbose", "v", false, "Make some noise!")
 }
 
 // initConfig reads in config file and ENV variables if set.

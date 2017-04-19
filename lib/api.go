@@ -7,8 +7,9 @@ import (
 
 type Config struct {
 	Verbose     bool
-	ProjectPath string   `mapstructure:"project-path"`
-	IgnorePaths []string `mapstructure:"ignore-paths"`
+	ProjectPath string
+	IgnorePaths []string
+	OutputPath  string
 }
 
 type Formatter interface {
