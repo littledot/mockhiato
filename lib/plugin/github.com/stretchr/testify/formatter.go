@@ -64,7 +64,7 @@ func (r *testifyFormatter) generateMock(pack *lib.Package) {
 		panic(err)
 	}
 	pkgName := pack.Interfaces[0].TObject.Pkg().Name()
-	pkgPath, err := filepath.Rel(r.projectPackage, pack.TPackage.Path())
+	pkgPath, err := filepath.Rel(r.projectPackage, pack.Context.Path())
 	if err != nil {
 		panic(err)
 	}
@@ -76,9 +76,8 @@ func (r *testifyFormatter) generateMock(pack *lib.Package) {
 	defer mockFile.Close()
 
 	buf := &bytes.Buffer{}
-	pf := lib.NewPackageFormatter()
-	pf.Context = pack.TPackage
-	pf.AnalyzePackage(pack.TPackage)
+	pf := lib.NewPackageFormatter(pack.Context)
+	pf.IndexPackage(pack.Context)
 
 	// Write package
 	buf.WriteString(fmt.Sprintf("package %s\n", pkgName))

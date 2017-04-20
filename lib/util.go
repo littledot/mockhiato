@@ -5,58 +5,56 @@ import (
 	"strconv"
 )
 
-func TObjectTypeToString(obj types.Object) string {
-	return TTypeToString(obj.Type())
-}
-
-func TTypeToString(obj types.Type) string {
-	return types.TypeString(obj, (*types.Package).Name)
-}
-
+// PackageFormatter indexes packages and generates package aliases if required.
 type PackageFormatter struct {
-	PathToAlias map[string]string
 	Context     *types.Package
-
-	dependencies map[string]*types.Package
-	usedAliases  map[string]int
+	PathToAlias map[string]string
+	usedAliases map[string]int
 }
 
-func NewPackageFormatter() *PackageFormatter {
+// NewPackageFormatter creates a new PackageFormatter.
+func NewPackageFormatter(context *types.Package) *PackageFormatter {
 	return &PackageFormatter{
-		dependencies: map[string]*types.Package{},
-		PathToAlias:  map[string]string{},
-		usedAliases:  map[string]int{},
+		Context:     context,
+		PathToAlias: map[string]string{},
+		usedAliases: map[string]int{},
 	}
 }
 
-func (r *PackageFormatter) AnalyzePackage(tPackage *types.Package) {
+// IndexPackage indexes tPackage's dependencies.
+func (r *PackageFormatter) IndexPackage(tPackage *types.Package) {
 	for _, tImport := range tPackage.Imports() {
 		r.RecordDependency(tImport)
 	}
 }
 
-func (r *PackageFormatter) AnalyzeInterface(tInterface *types.Interface) {
+// IndexInterface indexes tInterface's dependencies.
+func (r *PackageFormatter) IndexInterface(tInterface *types.Interface) {
 	for i := 0; i < tInterface.NumMethods(); i++ {
-		r.AnalyzeFunc(tInterface.Method(i))
+		r.IndexFunc(tInterface.Method(i))
 	}
 }
 
-func (r *PackageFormatter) AnalyzeFunc(tFunc *types.Func) {
-	r.AnalyzeSignature(tFunc.Type().(*types.Signature))
+// IndexFunc indexes tFunc's dependencies.
+func (r *PackageFormatter) IndexFunc(tFunc *types.Func) {
+	r.IndexSignature(tFunc.Type().(*types.Signature))
 }
 
-func (r *PackageFormatter) AnalyzeSignature(tSignature *types.Signature) {
-	r.AnalyzeTuple(tSignature.Params())
-	r.AnalyzeTuple(tSignature.Results())
+// IndexSignature indexes tSignature's dependencies.
+func (r *PackageFormatter) IndexSignature(tSignature *types.Signature) {
+	r.IndexTuple(tSignature.Params())
+	r.IndexTuple(tSignature.Results())
 }
 
-func (r *PackageFormatter) AnalyzeTuple(tTuple *types.Tuple) {
+// IndexTuple indexes tTuple's dependencies
+func (r *PackageFormatter) IndexTuple(tTuple *types.Tuple) {
 	for i := 0; i < tTuple.Len(); i++ {
 		tVar := tTuple.At(i)
 		types.ObjectString(tVar, r.RecordDependency)
 	}
 }
 
+// RecordDependency indexes tPackage as a dependency and returns its name.
 func (r *PackageFormatter) RecordDependency(tPackage *types.Package) string {
 	if tPackage.Path() == r.Context.Path() {
 		return ""
@@ -80,10 +78,12 @@ func (r *PackageFormatter) RecordDependency(tPackage *types.Package) string {
 	return alias
 }
 
-func (r *PackageFormatter) ObjectTypeString(t types.Object) string {
-	return r.TypeString(t.Type())
+// ObjectTypeString returns the string representation of tObject's type.
+func (r *PackageFormatter) ObjectTypeString(tObject types.Object) string {
+	return r.TypeString(tObject.Type())
 }
 
+// TypeString returns the string representation of tType.
 func (r *PackageFormatter) TypeString(tType types.Type) string {
 	return types.TypeString(tType, r.RecordDependency)
 }

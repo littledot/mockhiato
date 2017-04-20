@@ -110,10 +110,10 @@ func (r *Oracle) typeCheckSources(packagePath string, sourcePaths []string) *lib
 	}
 
 	pack := &lib.Package{}
-	pack.TPackage = tPackage
+	pack.Context = tPackage
 
 	// Index imports used by the package
-	pack.TImports = tPackage.Imports()
+	pack.Imports = tPackage.Imports()
 
 	// Index interfaces defined in the package
 	for _, def := range info.Defs {
