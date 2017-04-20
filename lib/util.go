@@ -15,6 +15,7 @@ func TTypeToString(obj types.Type) string {
 
 type PackageFormatter struct {
 	PathToAlias map[string]string
+	Context     *types.Package
 
 	dependencies map[string]*types.Package
 	usedAliases  map[string]int
@@ -29,7 +30,6 @@ func NewPackageFormatter() *PackageFormatter {
 }
 
 func (r *PackageFormatter) AnalyzePackage(tPackage *types.Package) {
-	r.RecordDependency(tPackage)
 	for _, tImport := range tPackage.Imports() {
 		r.RecordDependency(tImport)
 	}
@@ -58,6 +58,10 @@ func (r *PackageFormatter) AnalyzeTuple(tTuple *types.Tuple) {
 }
 
 func (r *PackageFormatter) RecordDependency(tPackage *types.Package) string {
+	if tPackage.Path() == r.Context.Path() {
+		return ""
+	}
+
 	if alias, exists := r.PathToAlias[tPackage.Path()]; exists {
 		return alias
 	}

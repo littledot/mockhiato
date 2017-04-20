@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"go/types"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"strconv"
 	"strings"
@@ -63,7 +64,11 @@ func (r *testifyFormatter) generateMock(pack *lib.Package) {
 		panic(err)
 	}
 	pkgName := pack.Interfaces[0].TObject.Pkg().Name()
-	mockPath := fmt.Sprintf("%s/%s_mocks.go", r.config.OutputPath, pkgName)
+	pkgPath, err := filepath.Rel(r.projectPackage, pack.TPackage.Path())
+	if err != nil {
+		panic(err)
+	}
+	mockPath := fmt.Sprintf("%s/mockhiato_mocks.go", pkgPath)
 	mockFile, err := os.Create(mockPath)
 	if err != nil {
 		panic(err)
@@ -72,17 +77,18 @@ func (r *testifyFormatter) generateMock(pack *lib.Package) {
 
 	buf := &bytes.Buffer{}
 	pf := lib.NewPackageFormatter()
+	pf.Context = pack.TPackage
 	pf.AnalyzePackage(pack.TPackage)
 
 	// Write package
-	buf.WriteString(fmt.Sprintf("package %s\n", filepath.Base(r.config.OutputPath)))
+	buf.WriteString(fmt.Sprintf("package %s\n", pkgName))
 
 	// Write magic string
 	buf.WriteString(magic + "\n")
 
 	// Write imports
-	vendorPath := r.projectPackage + "/vendor/" // TODO: use typesImporterFrom instead of types.Importer
-	imports := []string{`"github.com/stretchr/testify/mock"`}
+	vendorPath := r.projectPackage + "/vendor/"               // TODO: use typesImporterFrom instead of types.Importer
+	imports := []string{`"github.com/stretchr/testify/mock"`} // TODO: add this as dependency, not raw string
 	for depPath, depAlias := range pf.PathToAlias {
 		imports = append(imports, fmt.Sprintf(`%s "%s"`, depAlias, strings.TrimPrefix(depPath, vendorPath)))
 	}
@@ -93,8 +99,9 @@ func (r *testifyFormatter) generateMock(pack *lib.Package) {
 	for _, iface := range pack.Interfaces {
 		// Write struct
 		interfaceName := iface.TObject.Name()
-		buf.WriteString(fmt.Sprintf("// %s implements %s.%s\n", interfaceName, pkgName, interfaceName))
-		buf.WriteString(fmt.Sprintf("type %s struct { mock.Mock }\n", interfaceName))
+		mockName := interfaceName + "Mock"
+		buf.WriteString(fmt.Sprintf("// %s implements %s.%s\n", mockName, pkgName, interfaceName))
+		buf.WriteString(fmt.Sprintf("type %s struct { mock.Mock }\n", mockName))
 
 		for i := 0; i < iface.TInterface.NumMethods(); i++ {
 			// Write method
@@ -127,7 +134,7 @@ func (r *testifyFormatter) generateMock(pack *lib.Package) {
 			}
 
 			commentLine := fmt.Sprintf("// %s implements (%s.%s).%s\n", method.Name(), pkgName, interfaceName, method.Name())
-			signatureLine := fmt.Sprintf("func (r *%s) %s(%s) (%s) {\n", interfaceName, method.Name(), strings.Join(paramExprs, ", "), strings.Join(returnTypes, ","))
+			signatureLine := fmt.Sprintf("func (r *%s) %s(%s) (%s) {\n", mockName, method.Name(), strings.Join(paramExprs, ", "), strings.Join(returnTypes, ","))
 			verifyInvokedLine := fmt.Sprintf("r.Called(%s)\n", strings.Join(paramNames, ", "))
 			if signature.Results().Len() > 0 {
 				verifyInvokedLine = "ret := " + verifyInvokedLine
