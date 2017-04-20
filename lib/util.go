@@ -29,6 +29,7 @@ func NewPackageFormatter() *PackageFormatter {
 }
 
 func (r *PackageFormatter) AnalyzePackage(tPackage *types.Package) {
+	r.RecordDependency(tPackage)
 	for _, tImport := range tPackage.Imports() {
 		r.RecordDependency(tImport)
 	}
