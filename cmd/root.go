@@ -18,6 +18,8 @@ import (
 	"fmt"
 	"os"
 
+	"gitlab.com/littledot/mockhiato/lib"
+
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -71,4 +73,15 @@ func initConfig() {
 	if err := viper.ReadInConfig(); err == nil {
 		fmt.Println("Using config file:", viper.ConfigFileUsed())
 	}
+}
+
+func getConfig(cmd *cobra.Command) lib.Config {
+	if err := viper.BindPFlags(cmd.Flags()); err != nil {
+		panic(err)
+	}
+	config := lib.Config{}
+	if err := viper.Unmarshal(&config); err != nil {
+		panic(err)
+	}
+	return config
 }
