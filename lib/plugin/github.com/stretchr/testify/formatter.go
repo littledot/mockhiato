@@ -59,11 +59,7 @@ func (r *testifyFormatter) generateMock(pack *lib.Package) {
 		return
 	}
 
-	// Create file {package_name}_mocks.go
-	if err := os.MkdirAll(r.config.OutputPath, 0755); err != nil {
-		panic(err)
-	}
-	pkgName := pack.Interfaces[0].TObject.Pkg().Name()
+	pkgName := pack.Context.Name()
 	pkgPath, err := filepath.Rel(r.projectPackage, pack.Context.Path())
 	if err != nil {
 		panic(err)
