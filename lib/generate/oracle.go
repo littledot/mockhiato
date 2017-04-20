@@ -1,7 +1,6 @@
 package generate
 
 import (
-	"fmt"
 	"go/ast"
 	"go/importer"
 	"go/parser"
@@ -11,21 +10,9 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/davecgh/go-spew/spew"
 	"gitlab.com/littledot/mockhiato/lib"
 	"gitlab.com/littledot/mockhiato/lib/plugin/github.com/stretchr/testify"
 )
-
-func Run(config lib.Config) {
-	oracle := NewOracle(config)
-	project := oracle.ScanProject()
-	fmt.Println("dumping project...")
-	spew.Dump(project)
-	spec := oracle.TypeCheckProject(project)
-	fmt.Println("dumping spec...")
-	spew.Dump(spec)
-	oracle.GenerateMocks(spec)
-}
 
 // Oracle parses Go projects, looking for interfaces to mock.
 type Oracle struct {
