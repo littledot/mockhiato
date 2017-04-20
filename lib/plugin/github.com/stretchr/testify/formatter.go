@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"go/types"
 	"os"
-	"os/exec"
 	"path/filepath"
 	"strconv"
 	"strings"
@@ -63,7 +62,7 @@ func (r *testifyFormatter) generateMock(pack *lib.Package) {
 	if err := os.MkdirAll(r.config.OutputPath, 0755); err != nil {
 		panic(err)
 	}
-	pkgName := pack.Interfaces[0].Object.Pkg().Name()
+	pkgName := pack.Interfaces[0].TObject.Pkg().Name()
 	mockPath := fmt.Sprintf("%s/%s_mocks.go", r.config.OutputPath, pkgName)
 	mockFile, err := os.Create(mockPath)
 	if err != nil {
@@ -72,6 +71,8 @@ func (r *testifyFormatter) generateMock(pack *lib.Package) {
 	defer mockFile.Close()
 
 	buf := &bytes.Buffer{}
+	pf := lib.NewPackageFormatter()
+	pf.AnalyzePackage(pack.TPackage)
 
 	// Write package
 	buf.WriteString(fmt.Sprintf("package %s\n", filepath.Base(r.config.OutputPath)))
@@ -80,10 +81,10 @@ func (r *testifyFormatter) generateMock(pack *lib.Package) {
 	buf.WriteString(magic + "\n")
 
 	// Write imports
-	vendorPath := r.projectPackage + "/vendor/"
+	vendorPath := r.projectPackage + "/vendor/" // TODO: use typesImporterFrom instead of types.Importer
 	imports := []string{`"github.com/stretchr/testify/mock"`}
-	for _, tImport := range pack.Imports {
-		imports = append(imports, strconv.Quote(strings.TrimPrefix(tImport.Path(), vendorPath)))
+	for depPath, depAlias := range pf.PathToAlias {
+		imports = append(imports, fmt.Sprintf(`%s "%s"`, depAlias, strings.TrimPrefix(depPath, vendorPath)))
 	}
 	buf.WriteString("import(\n")
 	buf.WriteString(strings.Join(imports, "\n"))
@@ -91,13 +92,13 @@ func (r *testifyFormatter) generateMock(pack *lib.Package) {
 
 	for _, iface := range pack.Interfaces {
 		// Write struct
-		interfaceName := iface.Object.Name()
+		interfaceName := iface.TObject.Name()
 		buf.WriteString(fmt.Sprintf("// %s implements %s.%s\n", interfaceName, pkgName, interfaceName))
 		buf.WriteString(fmt.Sprintf("type %s struct { mock.Mock }\n", interfaceName))
 
-		for i := 0; i < iface.Interface.NumMethods(); i++ {
+		for i := 0; i < iface.TInterface.NumMethods(); i++ {
 			// Write method
-			method := iface.Interface.Method(i)
+			method := iface.TInterface.Method(i)
 			signature := method.Type().(*types.Signature)
 
 			paramNames := []string{}
@@ -106,7 +107,7 @@ func (r *testifyFormatter) generateMock(pack *lib.Package) {
 				param := signature.Params().At(j)
 				varName := "p" + strconv.Itoa(j)
 				paramNames = append(paramNames, varName)
-				paramExprs = append(paramExprs, varName+" "+lib.TObjectTypeToString(param))
+				paramExprs = append(paramExprs, varName+" "+pf.ObjectTypeString(param))
 			}
 
 			if signature.Variadic() { // Variadic method? Replace last parameter's [] with ... ("p1 []int" -> "p1 ...int")
@@ -121,8 +122,8 @@ func (r *testifyFormatter) generateMock(pack *lib.Package) {
 				result := signature.Results().At(j)
 				varName := "ret" + strconv.Itoa(j)
 				returnNames = append(returnNames, varName)
-				returnTypes = append(returnTypes, lib.TObjectTypeToString(result))
-				verifyReturnLines = append(verifyReturnLines, fmt.Sprintf("%s := ret.Get(%d).(%s)\n", varName, j, lib.TObjectTypeToString(result)))
+				returnTypes = append(returnTypes, pf.ObjectTypeString(result))
+				verifyReturnLines = append(verifyReturnLines, fmt.Sprintf("%s := ret.Get(%d).(%s)\n", varName, j, pf.ObjectTypeString(result)))
 			}
 
 			commentLine := fmt.Sprintf("// %s implements (%s.%s).%s\n", method.Name(), pkgName, interfaceName, method.Name())

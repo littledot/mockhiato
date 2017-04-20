@@ -33,11 +33,12 @@ type Spec struct {
 }
 
 type Package struct {
+	TPackage   *types.Package
+	TImports   []*types.Package
 	Interfaces []*Interface
-	Imports    []*types.Package
 }
 
 type Interface struct {
-	Object    types.Object
-	Interface *types.Interface
+	TObject    types.Object
+	TInterface *types.Interface
 }

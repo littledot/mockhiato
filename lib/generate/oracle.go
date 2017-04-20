@@ -1,6 +1,7 @@
 package generate
 
 import (
+	"fmt"
 	"go/ast"
 	"go/importer"
 	"go/parser"
@@ -10,8 +11,6 @@ import (
 	"path/filepath"
 	"strings"
 
-	"golang.org/x/tools/go/types/typeutil"
-
 	"github.com/davecgh/go-spew/spew"
 	"gitlab.com/littledot/mockhiato/lib"
 	"gitlab.com/littledot/mockhiato/lib/plugin/github.com/stretchr/testify"
@@ -20,8 +19,10 @@ import (
 func Run(config lib.Config) {
 	oracle := NewOracle(config)
 	project := oracle.ScanProject()
+	fmt.Println("dumping project...")
 	spew.Dump(project)
 	spec := oracle.TypeCheckProject(project)
+	fmt.Println("dumping spec...")
 	spew.Dump(spec)
 	oracle.GenerateMocks(spec)
 }
@@ -122,9 +123,10 @@ func (r *Oracle) typeCheckSources(packagePath string, sourcePaths []string) *lib
 	}
 
 	pack := &lib.Package{}
+	pack.TPackage = tPackage
 
 	// Index imports used by the package
-	pack.Imports = typeutil.Dependencies(tPackage)
+	pack.TImports = tPackage.Imports()
 
 	// Index interfaces defined in the package
 	for _, def := range info.Defs {
@@ -140,8 +142,8 @@ func (r *Oracle) typeCheckSources(packagePath string, sourcePaths []string) *lib
 
 		interfaceDef := def.Type().Underlying().(*types.Interface).Complete()
 		iface := &lib.Interface{
-			Object:    def,
-			Interface: interfaceDef,
+			TObject:    def,
+			TInterface: interfaceDef,
 		}
 		pack.Interfaces = append(pack.Interfaces, iface)
 	}
