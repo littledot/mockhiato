@@ -30,6 +30,7 @@ type testifyFormatter struct {
 	projectPackage string
 }
 
+// TODO: this info should be given by oracle
 func (r *testifyFormatter) SetProjectPackage(projectPackage string) {
 	r.projectPackage = projectPackage
 }
@@ -48,8 +49,8 @@ func (r *testifyFormatter) IsMockFile(file *os.File) bool {
 	return false
 }
 
-func (r *testifyFormatter) GenerateMocks(spec *lib.Spec) {
-	for _, pack := range spec.Packages {
+func (r *testifyFormatter) GenerateMocks(spec *lib.Project) {
+	for _, pack := range spec.PathToPackage {
 		r.generateMock(pack)
 	}
 }
@@ -58,13 +59,9 @@ func (r *testifyFormatter) generateMock(pack *lib.Package) {
 	if len(pack.Interfaces) == 0 { // Nothing to mock? Return early
 		return
 	}
-
 	pkgName := pack.Context.Name()
-	pkgPath, err := filepath.Rel(r.projectPackage, pack.Context.Path())
-	if err != nil {
-		panic(err)
-	}
-	mockPath := fmt.Sprintf("%s/mockhiato_mocks.go", pkgPath)
+
+	mockPath := filepath.Join(pack.AbsPath, "mockhiato_mocks.go")
 	mockFile, err := os.Create(mockPath)
 	if err != nil {
 		panic(err)
@@ -82,7 +79,7 @@ func (r *testifyFormatter) generateMock(pack *lib.Package) {
 	buf.WriteString(magic + "\n")
 
 	// Write imports
-	vendorPath := r.projectPackage + "/vendor/"               // TODO: use typesImporterFrom instead of types.Importer
+	vendorPath := r.projectPackage + "/vendor/"               // TODO: use types.ImporterFrom instead of types.Importer
 	imports := []string{`"github.com/stretchr/testify/mock"`} // TODO: add this as dependency, not raw string
 	for depPath, depAlias := range pf.PathToAlias {
 		imports = append(imports, fmt.Sprintf(`%s "%s"`, depAlias, strings.TrimPrefix(depPath, vendorPath)))

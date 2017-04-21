@@ -68,8 +68,15 @@ func (r *Oracle) ScanProject() *lib.Project {
 			return nil
 		}
 
-		packagePath := strings.Split(filepath.Dir(filePath), "src/")[1]
-		project.SourceSet[packagePath] = append(project.SourceSet[packagePath], filePath)
+		packageAbsPath := filepath.Dir(filePath)
+		pack := project.PathToPackage[packageAbsPath]
+		if pack == nil {
+			pack = &lib.Package{}
+			pack.AbsPath = packageAbsPath
+			pack.PackagePath = strings.Split(packageAbsPath, "src/")[1] // TODO: multiple src in path?
+			project.PathToPackage[packageAbsPath] = pack
+		}
+		pack.SourcePaths = append(pack.SourcePaths, filePath)
 		return nil
 	})
 	if err != nil {
@@ -78,20 +85,17 @@ func (r *Oracle) ScanProject() *lib.Project {
 	return project
 }
 
-func (r *Oracle) TypeCheckProject(project *lib.Project) *lib.Spec {
-	spec := &lib.Spec{}
-	for packagePath, sourcePaths := range project.SourceSet {
-		pack := r.typeCheckSources(packagePath, sourcePaths)
-		spec.Packages = append(spec.Packages, pack)
+func (r *Oracle) TypeCheckProject(project *lib.Project) {
+	for _, pack := range project.PathToPackage {
+		r.typeCheckSources(pack)
 	}
-	return spec
 }
 
-func (r *Oracle) typeCheckSources(packagePath string, sourcePaths []string) *lib.Package {
+func (r *Oracle) typeCheckSources(pack *lib.Package) {
 	// Build package AST from sources
 	fset := token.NewFileSet()
 	astFiles := []*ast.File{}
-	for _, sourcePath := range sourcePaths {
+	for _, sourcePath := range pack.SourcePaths {
 		astFile, err := parser.ParseFile(fset, sourcePath, nil, parser.AllErrors)
 		if err != nil {
 			panic(err)
@@ -101,15 +105,13 @@ func (r *Oracle) typeCheckSources(packagePath string, sourcePaths []string) *lib
 
 	// Type-check package AST
 	typeChecker := &types.Config{}
-	typeChecker.Importer = importer.Default()
+	typeChecker.Importer = importer.Default() // TODO: use types.ImporterFrom instead of types.Importer
 	info := &types.Info{}
 	info.Defs = map[*ast.Ident]types.Object{}
-	tPackage, err := typeChecker.Check(packagePath, fset, astFiles, info)
+	tPackage, err := typeChecker.Check(pack.PackagePath, fset, astFiles, info)
 	if err != nil {
 		panic(err)
 	}
-
-	pack := &lib.Package{}
 	pack.Context = tPackage
 
 	// Index imports used by the package
@@ -134,6 +136,4 @@ func (r *Oracle) typeCheckSources(packagePath string, sourcePaths []string) *lib
 		}
 		pack.Interfaces = append(pack.Interfaces, iface)
 	}
-
-	return pack
 }

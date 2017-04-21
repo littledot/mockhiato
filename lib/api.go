@@ -5,7 +5,7 @@ import (
 	"os"
 )
 
-// Config configures Mockhiato behavior
+// Config configures Mockhiato behavior.
 type Config struct {
 	Verbose     bool
 	ProjectPath string
@@ -16,28 +16,32 @@ type Config struct {
 // Formatter formats mock files.
 type Formatter interface {
 	SetProjectPackage(projectPackage string)
-	GenerateMocks(spec *Spec)
+	GenerateMocks(project *Project)
 	IsMockFile(file *os.File) bool
 }
 
+// Project represents the project Mockhiato is operating on.
 type Project struct {
-	SourceSet map[string][]string
+	// PathToPackage contains a mapping of package's absolute path to the package.
+	PathToPackage map[string]*Package
 }
 
 // NewProject creates a new Project.
 func NewProject() *Project {
 	return &Project{
-		SourceSet: map[string][]string{},
+		PathToPackage: map[string]*Package{},
 	}
-}
-
-// Spec contains a list of packages discovered in the project tree. Formatters rely on this to generate mocks.
-type Spec struct {
-	Packages []*Package
 }
 
 // Package contains metadata for a package discovered in the project tree. Formatters rely on this to generate mocks.
 type Package struct {
+	// AbsPath is the package's absolute path.
+	AbsPath string
+	// PackagePath is the package's path, which should be the relative path to $GOPATH/src/.
+	PackagePath string
+	// SourcePath contains paths for Go source code.
+	SourcePaths []string
+
 	// Context is the package of the project.
 	Context *types.Package
 	// Imports contains dependencies used by the package.

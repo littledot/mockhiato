@@ -12,8 +12,8 @@ func Run(config lib.Config) {
 	project := oracle.ScanProject()
 	fmt.Println("dumping project...")
 	spew.Dump(project)
-	spec := oracle.TypeCheckProject(project)
+	oracle.TypeCheckProject(project)
 	fmt.Println("dumping spec...")
-	spew.Dump(spec)
-	oracle.GenerateMocks(spec)
+	spew.Dump(project)
+	oracle.GenerateMocks(project)
 }
