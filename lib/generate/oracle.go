@@ -37,6 +37,8 @@ func (r *Oracle) ScanProject() *lib.Project {
 	}
 
 	project := lib.NewProject()
+	project.PackagePath = lib.GetPackagePath(projectPath)
+	project.VendorPath = filepath.Join(project.PackagePath, "vendor")
 	err = filepath.Walk(projectPath, func(filePath string, info os.FileInfo, err error) error {
 		if err != nil { // Something wrong? Skip
 			return nil
@@ -72,7 +74,7 @@ func (r *Oracle) ScanProject() *lib.Project {
 		if pack == nil {
 			pack = &lib.Package{}
 			pack.AbsPath = packageAbsPath
-			pack.PackagePath = strings.Split(packageAbsPath, "src/")[1] // TODO: multiple src in path?
+			pack.PackagePath = lib.GetPackagePath(packageAbsPath)
 			project.PathToPackage[packageAbsPath] = pack
 		}
 		pack.SourceAbsPaths = append(pack.SourceAbsPaths, filePath)
@@ -105,7 +107,7 @@ func (r *Oracle) typeCheckSources(pack *lib.Package) {
 
 	// Type-check package AST
 	typeChecker := &types.Config{}
-	typeChecker.Importer = importer.Default() // TODO: use types.ImporterFrom instead of types.Importer
+	typeChecker.Importer = importer.Default()
 	info := &types.Info{}
 	info.Defs = map[*ast.Ident]types.Object{}
 	tPackage, err := typeChecker.Check(pack.PackagePath, fset, astFiles, info)

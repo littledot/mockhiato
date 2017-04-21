@@ -21,6 +21,10 @@ type Formatter interface {
 
 // Project represents the project Mockhiato is operating on.
 type Project struct {
+	// PackagePath is the project's package path, which should be the relative path to $GOPATH/src/.
+	PackagePath string
+	// VendorPath is the project's vedor path, which should be PackagePath/vendor
+	VendorPath string
 	// PathToPackage contains a mapping of package's absolute path to the package.
 	PathToPackage map[string]*Package
 }

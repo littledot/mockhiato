@@ -43,13 +43,13 @@ func (r *testifyFormatter) IsMockFile(file *os.File) bool {
 	return false
 }
 
-func (r *testifyFormatter) GenerateMocks(spec *lib.Project) {
-	for _, pack := range spec.PathToPackage {
-		r.generateMock(pack)
+func (r *testifyFormatter) GenerateMocks(project *lib.Project) {
+	for _, pack := range project.PathToPackage {
+		r.generateMock(project, pack)
 	}
 }
 
-func (r *testifyFormatter) generateMock(pack *lib.Package) {
+func (r *testifyFormatter) generateMock(project *lib.Project, pack *lib.Package) {
 	if len(pack.Interfaces) == 0 { // Nothing to mock? Return early
 		return
 	}
@@ -74,10 +74,9 @@ func (r *testifyFormatter) generateMock(pack *lib.Package) {
 	buf.WriteString(magic + "\n")
 
 	// Write imports
-	vendorPath := pack.PackagePath + "/vendor/" // TODO: use types.ImporterFrom instead of types.Importer
 	imports := []string{}
 	for depPath, depAlias := range pf.PathToAlias {
-		imports = append(imports, fmt.Sprintf(`%s "%s"`, depAlias, strings.TrimPrefix(depPath, vendorPath)))
+		imports = append(imports, fmt.Sprintf(`%s "%s"`, depAlias, strings.TrimPrefix(depPath, project.VendorPath+"/")))
 	}
 	buf.WriteString("import(\n")
 	buf.WriteString(strings.Join(imports, "\n"))
