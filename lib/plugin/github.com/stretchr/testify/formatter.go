@@ -26,13 +26,7 @@ func NewTestifyFormatter(config lib.Config) lib.Formatter {
 }
 
 type testifyFormatter struct {
-	config         lib.Config
-	projectPackage string
-}
-
-// TODO: this info should be given by oracle
-func (r *testifyFormatter) SetProjectPackage(projectPackage string) {
-	r.projectPackage = projectPackage
+	config lib.Config
 }
 
 func (r *testifyFormatter) IsMockFile(file *os.File) bool {
@@ -79,7 +73,7 @@ func (r *testifyFormatter) generateMock(pack *lib.Package) {
 	buf.WriteString(magic + "\n")
 
 	// Write imports
-	vendorPath := r.projectPackage + "/vendor/"               // TODO: use types.ImporterFrom instead of types.Importer
+	vendorPath := pack.PackagePath + "/vendor/"               // TODO: use types.ImporterFrom instead of types.Importer
 	imports := []string{`"github.com/stretchr/testify/mock"`} // TODO: add this as dependency, not raw string
 	for depPath, depAlias := range pf.PathToAlias {
 		imports = append(imports, fmt.Sprintf(`%s "%s"`, depAlias, strings.TrimPrefix(depPath, vendorPath)))

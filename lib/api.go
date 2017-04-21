@@ -15,7 +15,6 @@ type Config struct {
 
 // Formatter formats mock files.
 type Formatter interface {
-	SetProjectPackage(projectPackage string)
 	GenerateMocks(project *Project)
 	IsMockFile(file *os.File) bool
 }
@@ -39,8 +38,8 @@ type Package struct {
 	AbsPath string
 	// PackagePath is the package's path, which should be the relative path to $GOPATH/src/.
 	PackagePath string
-	// SourcePath contains paths for Go source code.
-	SourcePaths []string
+	// SourceAbsPaths contains absolute path of all Go source files within the package.
+	SourceAbsPaths []string
 
 	// Context is the package of the project.
 	Context *types.Package

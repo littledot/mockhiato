@@ -35,7 +35,6 @@ func (r *Oracle) ScanProject() *lib.Project {
 	if err != nil {
 		panic(err)
 	}
-	r.Formatter.SetProjectPackage(strings.Split(projectPath, "src/")[1])
 
 	project := lib.NewProject()
 	err = filepath.Walk(projectPath, func(filePath string, info os.FileInfo, err error) error {
@@ -76,7 +75,7 @@ func (r *Oracle) ScanProject() *lib.Project {
 			pack.PackagePath = strings.Split(packageAbsPath, "src/")[1] // TODO: multiple src in path?
 			project.PathToPackage[packageAbsPath] = pack
 		}
-		pack.SourcePaths = append(pack.SourcePaths, filePath)
+		pack.SourceAbsPaths = append(pack.SourceAbsPaths, filePath)
 		return nil
 	})
 	if err != nil {
@@ -85,6 +84,7 @@ func (r *Oracle) ScanProject() *lib.Project {
 	return project
 }
 
+// TypeCheckProject type-checks Go source code.
 func (r *Oracle) TypeCheckProject(project *lib.Project) {
 	for _, pack := range project.PathToPackage {
 		r.typeCheckSources(pack)
@@ -95,7 +95,7 @@ func (r *Oracle) typeCheckSources(pack *lib.Package) {
 	// Build package AST from sources
 	fset := token.NewFileSet()
 	astFiles := []*ast.File{}
-	for _, sourcePath := range pack.SourcePaths {
+	for _, sourcePath := range pack.SourceAbsPaths {
 		astFile, err := parser.ParseFile(fset, sourcePath, nil, parser.AllErrors)
 		if err != nil {
 			panic(err)
