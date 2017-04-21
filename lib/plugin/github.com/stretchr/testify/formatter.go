@@ -64,7 +64,8 @@ func (r *testifyFormatter) generateMock(pack *lib.Package) {
 
 	buf := &bytes.Buffer{}
 	pf := lib.NewPackageFormatter(pack.Context)
-	pf.IndexPackage(pack.Context)
+	pf.RecordDependency(types.NewPackage("github.com/stretchr/testify/mock", "mock"))
+	pf.IndexImports(pack.Context)
 
 	// Write package
 	buf.WriteString(fmt.Sprintf("package %s\n", pkgName))
@@ -73,8 +74,8 @@ func (r *testifyFormatter) generateMock(pack *lib.Package) {
 	buf.WriteString(magic + "\n")
 
 	// Write imports
-	vendorPath := pack.PackagePath + "/vendor/"               // TODO: use types.ImporterFrom instead of types.Importer
-	imports := []string{`"github.com/stretchr/testify/mock"`} // TODO: add this as dependency, not raw string
+	vendorPath := pack.PackagePath + "/vendor/" // TODO: use types.ImporterFrom instead of types.Importer
+	imports := []string{}
 	for depPath, depAlias := range pf.PathToAlias {
 		imports = append(imports, fmt.Sprintf(`%s "%s"`, depAlias, strings.TrimPrefix(depPath, vendorPath)))
 	}
@@ -135,7 +136,6 @@ func (r *testifyFormatter) generateMock(pack *lib.Package) {
 			}
 			buf.WriteString(returnLine)
 		}
-
 	}
 
 	mockFile.Write(buf.Bytes())

@@ -21,8 +21,8 @@ func NewPackageFormatter(context *types.Package) *PackageFormatter {
 	}
 }
 
-// IndexPackage indexes tPackage's dependencies.
-func (r *PackageFormatter) IndexPackage(tPackage *types.Package) {
+// IndexImports indexes tPackage's dependencies.
+func (r *PackageFormatter) IndexImports(tPackage *types.Package) {
 	for _, tImport := range tPackage.Imports() {
 		r.RecordDependency(tImport)
 	}
