@@ -8,6 +8,7 @@ import (
 	"go/types"
 	"os"
 	"path/filepath"
+	"sort"
 	"strings"
 
 	"gitlab.com/littledot/mockhiato/lib"
@@ -138,4 +139,5 @@ func (r *Oracle) typeCheckSources(pack *lib.Package) {
 		}
 		pack.Interfaces = append(pack.Interfaces, iface)
 	}
+	sort.Slice(pack.Interfaces, func(i, j int) bool { return pack.Interfaces[i].TObject.Name() < pack.Interfaces[j].TObject.Name() })
 }
