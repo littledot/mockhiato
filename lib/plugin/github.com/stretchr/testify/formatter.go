@@ -53,9 +53,8 @@ func (r *testifyFormatter) generateMock(project *lib.Project, pack *lib.Package)
 	if len(pack.Interfaces) == 0 { // Nothing to mock? Return early
 		return
 	}
-	pkgName := pack.Context.Name()
 
-	mockPath := filepath.Join(pack.AbsPath, "mockhiato_mocks.go")
+	mockPath := filepath.Join(pack.AbsPath, "mockhiato_mocks.go") // TODO: configurable
 	mockFile, err := os.Create(mockPath)
 	if err != nil {
 		panic(err)
@@ -68,7 +67,8 @@ func (r *testifyFormatter) generateMock(project *lib.Project, pack *lib.Package)
 	pf.IndexImports(pack.Context)
 
 	// Write package
-	buf.WriteString(fmt.Sprintf("package %s\n", pkgName))
+	packageName := pack.Context.Name()
+	buf.WriteString(fmt.Sprintf("package %s\n", packageName))
 
 	// Write magic string
 	buf.WriteString(magic + "\n")
@@ -86,7 +86,7 @@ func (r *testifyFormatter) generateMock(project *lib.Project, pack *lib.Package)
 		// Write struct
 		interfaceName := iface.TObject.Name()
 		mockName := interfaceName + "Mock"
-		buf.WriteString(fmt.Sprintf("// %s implements %s.%s\n", mockName, pkgName, interfaceName))
+		buf.WriteString(fmt.Sprintf("// %s implements %s.%s\n", mockName, packageName, interfaceName))
 		buf.WriteString(fmt.Sprintf("type %s struct { mock.Mock }\n", mockName))
 
 		for i := 0; i < iface.TInterface.NumMethods(); i++ {
@@ -119,7 +119,7 @@ func (r *testifyFormatter) generateMock(project *lib.Project, pack *lib.Package)
 				verifyReturnLines = append(verifyReturnLines, fmt.Sprintf("%s := ret.Get(%d).(%s)\n", varName, j, pf.ObjectTypeString(result)))
 			}
 
-			commentLine := fmt.Sprintf("// %s implements (%s.%s).%s\n", method.Name(), pkgName, interfaceName, method.Name())
+			commentLine := fmt.Sprintf("// %s implements (%s.%s).%s\n", method.Name(), packageName, interfaceName, method.Name())
 			signatureLine := fmt.Sprintf("func (r *%s) %s(%s) (%s) {\n", mockName, method.Name(), strings.Join(paramExprs, ", "), strings.Join(returnTypes, ","))
 			verifyInvokedLine := fmt.Sprintf("r.Called(%s)\n", strings.Join(paramNames, ", "))
 			if signature.Results().Len() > 0 {

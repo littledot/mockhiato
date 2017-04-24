@@ -7,5 +7,7 @@ import:
   version: v1.1.0
   subpackages:
   - spew
-- package: github.com/Sirupsen/logrus
+- package: github.com/sirupsen/logrus
   version: v0.11.5
+- package: github.com/stretchr/testify
+  version: v1.1.4
