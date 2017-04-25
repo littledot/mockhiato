@@ -14,8 +14,12 @@
 
 package main
 
-import "gitlab.com/littledot/mockhiato/cmd"
+import (
+	"gitlab.com/littledot/mockhiato/cmd"
+	"gitlab.com/littledot/mockhiato/lib"
+)
 
 func main() {
+	defer lib.Unpanic()()
 	cmd.Execute()
 }

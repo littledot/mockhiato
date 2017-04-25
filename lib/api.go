@@ -27,6 +27,8 @@ type Project struct {
 	VendorPath string
 	// PathToPackage contains a mapping of package's absolute path to the package.
 	PathToPackage map[string]*Package
+
+	AllErrors []error
 }
 
 // NewProject creates a new Project.
@@ -51,6 +53,8 @@ type Package struct {
 	Imports []*types.Package
 	// Interfaces contains interface definitions found in the package.
 	Interfaces []*Interface
+
+	Error error
 }
 
 // Interface contains metadata for an interface definition. Formatters rely on this to generate mocks.

@@ -1,11 +1,9 @@
 package cmd
 
 import (
-	"fmt"
-	"os"
-
 	"gitlab.com/littledot/mockhiato/lib"
 
+	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -28,8 +26,7 @@ var RootCmd = &cobra.Command{
 // This is called by main.main(). It only needs to happen once to the rootCmd.
 func Execute() {
 	if err := RootCmd.Execute(); err != nil {
-		fmt.Println(err)
-		os.Exit(-1)
+		log.Fatal(err)
 	}
 }
 
@@ -38,7 +35,7 @@ func init() {
 	// Here you will define your flags and configuration settings.
 	// Cobra supports Persistent Flags, which, if defined here,
 	// will be global for your application.
-	RootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.mockhiato.yaml)")
+	RootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is mockhiato.yaml)")
 	// Cobra also supports local flags, which will only run
 	// when this action is called directly.
 	RootCmd.PersistentFlags().BoolP("Verbose", "v", false, "Make some noise!")
@@ -51,13 +48,11 @@ func initConfig() {
 	}
 
 	viper.SetConfigName("mockhiato") // name of config file (without extension)
-	viper.AddConfigPath("$HOME")     // adding home directory as first search path
 	viper.AddConfigPath(".")
-	viper.AutomaticEnv() // read in environment variables that match
 
 	// If a config file is found, read it in.
 	if err := viper.ReadInConfig(); err == nil {
-		fmt.Println("Using config file:", viper.ConfigFileUsed())
+		log.Infof("Configuring mockhiato with %s", viper.ConfigFileUsed())
 	}
 }
 
@@ -69,5 +64,6 @@ func getConfig(cmd *cobra.Command) lib.Config {
 	if err := viper.Unmarshal(&config); err != nil {
 		panic(err)
 	}
+	log.Infof("Configs: %#v", config)
 	return config
 }

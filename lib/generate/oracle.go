@@ -11,6 +11,7 @@ import (
 	"sort"
 	"strings"
 
+	log "github.com/sirupsen/logrus"
 	"gitlab.com/littledot/mockhiato/lib"
 	"gitlab.com/littledot/mockhiato/lib/plugin/github.com/stretchr/testify"
 )
@@ -22,6 +23,7 @@ type Oracle struct {
 	config lib.Config
 }
 
+// NewOracle creates a new oracle.
 func NewOracle(config lib.Config) *Oracle {
 	oracle := &Oracle{
 		Formatter: testify.NewTestifyFormatter(config),
@@ -36,10 +38,14 @@ func (r *Oracle) ScanProject() *lib.Project {
 	if err != nil {
 		panic(err)
 	}
+	log.Infof(`Project path is %s`, projectPath)
 
 	project := lib.NewProject()
 	project.PackagePath = lib.GetPackagePath(projectPath)
+	log.Infof(`Package path is %s`, project.PackagePath)
 	project.VendorPath = filepath.Join(project.PackagePath, "vendor")
+	log.Infof(`Vendor path is %s`, project.VendorPath)
+
 	err = filepath.Walk(projectPath, func(filePath string, info os.FileInfo, err error) error {
 		if err != nil { // Something wrong? Skip
 			return nil
@@ -90,11 +96,14 @@ func (r *Oracle) ScanProject() *lib.Project {
 // TypeCheckProject type-checks Go source code.
 func (r *Oracle) TypeCheckProject(project *lib.Project) {
 	for _, pack := range project.PathToPackage {
-		r.typeCheckSources(pack)
+		r.typeCheckSources(project, pack)
 	}
 }
 
-func (r *Oracle) typeCheckSources(pack *lib.Package) {
+func (r *Oracle) typeCheckSources(project *lib.Project, pack *lib.Package) {
+	// Ignore Pain - Ignore sources which cannot be type-checked
+	defer recoverTypeCheckErrors(project, pack)()
+
 	// Build package AST from sources
 	fset := token.NewFileSet()
 	astFiles := []*ast.File{}
@@ -140,4 +149,15 @@ func (r *Oracle) typeCheckSources(pack *lib.Package) {
 		pack.Interfaces = append(pack.Interfaces, iface)
 	}
 	sort.Slice(pack.Interfaces, func(i, j int) bool { return pack.Interfaces[i].TObject.Name() < pack.Interfaces[j].TObject.Name() })
+}
+
+func recoverTypeCheckErrors(project *lib.Project, pack *lib.Package) func() {
+	return func() {
+		if err := lib.Err(recover()); err != nil {
+			log.Error(err.ErrorStack())
+			log.Errorf(`ignoring %s due to type check errors; see log for details`, pack.PackagePath)
+			project.AllErrors = append(project.AllErrors, err)
+			pack.Error = err
+		}
+	}
 }

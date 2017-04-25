@@ -10,6 +10,7 @@ import (
 	"gitlab.com/littledot/mockhiato/lib/plugin/github.com/stretchr/testify"
 )
 
+// Run executes the command.
 func Run(config lib.Config) {
 	projectPath, err := filepath.Abs(config.ProjectPath)
 	if err != nil {
