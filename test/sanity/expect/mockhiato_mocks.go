@@ -6,7 +6,7 @@ import (
 	json "encoding/json"
 	png "image/png"
 	os "os"
-	"time"
+	time "time"
 
 	mock "github.com/stretchr/testify/mock"
 )
