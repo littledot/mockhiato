@@ -9,10 +9,9 @@ import (
 
 // Config configures Mockhiato behavior.
 type Config struct {
-	Verbose     bool
-	ProjectPath string
-	IgnorePaths []string
-	OutputPath  string
+	Verbose      bool
+	ProjectPath  string
+	MockFileName string
 }
 
 // Formatter formats mock files.

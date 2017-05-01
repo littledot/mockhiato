@@ -56,7 +56,7 @@ func (r *testifyFormatter) generateMock(project *lib.Project, pack *lib.Package)
 		return
 	}
 
-	mockPath := filepath.Join(project.GoSrcAbsPath, pack.Context.Path(), "mockhiato_mocks.go") // TODO: configurable
+	mockPath := filepath.Join(project.GoSrcAbsPath, pack.Context.Path(), r.config.MockFileName)
 	log.Debugf("Generating mocks for %s at %s", pack.Context.Path(), mockPath)
 	mockFile, err := os.Create(mockPath)
 	if err != nil {

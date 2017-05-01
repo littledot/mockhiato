@@ -19,7 +19,8 @@ var generateCmd = &cobra.Command{
 func init() {
 	RootCmd.AddCommand(generateCmd)
 
-	generateCmd.Flags().StringP("ProjectPath", "p", ".", "Project root path")
-	generateCmd.Flags().StringSliceP("IgnorePaths", "i", []string{"vendor"}, "Ignore paths")
-	generateCmd.Flags().StringP("OutputPath", "o", "mocks", "Output path")
+	generateCmd.Flags().StringP("ProjectPath", "p", ".",
+		"Configures path of the project to generate mocks for. Default is current working directory.")
+	generateCmd.Flags().StringP("MockFileName", "n", "mockhiato_mocks.go",
+		"Configures the file name of generated mocks.")
 }
