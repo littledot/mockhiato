@@ -12,6 +12,7 @@ import (
 	"strings"
 
 	"gitlab.com/littledot/mockhiato/lib"
+	"gitlab.com/littledot/mockhiato/lib/log"
 )
 
 const (
@@ -44,9 +45,10 @@ func (r *testifyFormatter) IsMockFile(file *os.File) bool {
 }
 
 func (r *testifyFormatter) GenerateMocks(project *lib.Project) {
-	for _, pack := range project.PathToPackage {
+	for _, pack := range project.Packages {
 		r.generateMock(project, pack)
 	}
+
 }
 
 func (r *testifyFormatter) generateMock(project *lib.Project, pack *lib.Package) {
@@ -54,7 +56,8 @@ func (r *testifyFormatter) generateMock(project *lib.Project, pack *lib.Package)
 		return
 	}
 
-	mockPath := filepath.Join(pack.AbsPath, "mockhiato_mocks.go") // TODO: configurable
+	mockPath := filepath.Join(project.GoSrcAbsPath, pack.Context.Path(), "mockhiato_mocks.go") // TODO: configurable
+	log.Debugf("Generating mocks for %s at %s", pack.Context.Path(), mockPath)
 	mockFile, err := os.Create(mockPath)
 	if err != nil {
 		panic(err)

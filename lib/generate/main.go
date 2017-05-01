@@ -9,16 +9,9 @@ import (
 func Run(config lib.Config) {
 	log.Info("Running generate")
 
+	project := &lib.Project{}
 	oracle := NewOracle(config)
-	project := oracle.ScanProject()
-
-	log.Info("Scan project complete")
-
+	oracle.ScanProject(project)
 	oracle.TypeCheckProject(project)
-
-	log.Info("Type check complete")
-
 	oracle.GenerateMocks(project)
-
-	log.Info("Generate mocks complete")
 }

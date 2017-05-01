@@ -3,6 +3,8 @@ package lib
 import (
 	"go/types"
 	"os"
+
+	"golang.org/x/tools/go/loader"
 )
 
 // Config configures Mockhiato behavior.
@@ -21,36 +23,35 @@ type Formatter interface {
 
 // Project represents the project Mockhiato is operating on.
 type Project struct {
-	// PackagePath is the project's package path, which should be the relative path to $GOPATH/src/.
+	// ProjectAbsPath is the project's absolute path.
+	ProjectAbsPath string
+	// GoAbsPath is $GOPATH.
+	GoAbsPath string
+	// GoSrcAbsPath is $GOPATH/src.
+	GoSrcAbsPath string
+
+	// PackagePath is the project's package path, which should be the relative path to $GOPATH/src.
 	PackagePath string
 	// VendorPath is the project's vedor path, which should be PackagePath/vendor
 	VendorPath string
-	// PathToPackage contains a mapping of package's absolute path to the package.
-	PathToPackage map[string]*Package
+
+	Program  *loader.Program
+	Packages []*Package
 
 	AllErrors []error
 }
 
 // NewProject creates a new Project.
 func NewProject() *Project {
-	return &Project{
-		PathToPackage: map[string]*Package{},
-	}
+	return &Project{}
 }
 
 // Package contains metadata for a package discovered in the project tree. Formatters rely on this to generate mocks.
 type Package struct {
-	// AbsPath is the package's absolute path.
-	AbsPath string
-	// PackagePath is the package's path, which should be the relative path to $GOPATH/src/.
-	PackagePath string
-	// SourceAbsPaths contains absolute path of all Go source files within the package.
-	SourceAbsPaths []string
-
+	// PackageInfo is the loader's package info
+	PackageInfo *loader.PackageInfo
 	// Context is the package of the project.
 	Context *types.Package
-	// Imports contains dependencies used by the package.
-	Imports []*types.Package
 	// Interfaces contains interface definitions found in the package.
 	Interfaces []*Interface
 

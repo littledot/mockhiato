@@ -1,15 +1,13 @@
 package generate
 
 import (
-	"go/ast"
-	"go/importer"
 	"go/parser"
-	"go/token"
 	"go/types"
-	"os"
 	"path/filepath"
 	"sort"
 	"strings"
+
+	"golang.org/x/tools/go/loader"
 
 	log "github.com/sirupsen/logrus"
 	"gitlab.com/littledot/mockhiato/lib"
@@ -18,7 +16,7 @@ import (
 
 // Oracle parses Go projects, looking for interfaces to mock.
 type Oracle struct {
-	lib.Formatter
+	formatter lib.Formatter
 
 	config lib.Config
 }
@@ -26,110 +24,77 @@ type Oracle struct {
 // NewOracle creates a new oracle.
 func NewOracle(config lib.Config) *Oracle {
 	oracle := &Oracle{
-		Formatter: testify.NewTestifyFormatter(config),
+		formatter: testify.NewTestifyFormatter(config),
 		config:    config,
 	}
 	return oracle
 }
 
 // ScanProject walks the project directory, indexing valid Go source code
-func (r *Oracle) ScanProject() *lib.Project {
+func (r *Oracle) ScanProject(project *lib.Project) {
 	projectPath, err := filepath.Abs(r.config.ProjectPath)
 	if err != nil {
 		panic(err)
 	}
-	log.Infof(`Project path is %s`, projectPath)
+	project.ProjectAbsPath = projectPath
 
-	project := lib.NewProject()
-	project.PackagePath = lib.GetPackagePath(projectPath)
-	log.Infof(`Package path is %s`, project.PackagePath)
+	const src = "src/"
+	srcPos := strings.Index(projectPath, src)
+	project.GoAbsPath = projectPath[0 : srcPos-1]
+	project.GoSrcAbsPath = projectPath[0 : srcPos+len(src)-1]
+	project.PackagePath = projectPath[srcPos+len(src) : len(projectPath)]
 	project.VendorPath = filepath.Join(project.PackagePath, "vendor")
-	log.Infof(`Vendor path is %s`, project.VendorPath)
 
-	err = filepath.Walk(projectPath, func(filePath string, info os.FileInfo, err error) error {
-		if err != nil { // Something wrong? Skip
-			return nil
-		}
-		if !strings.HasSuffix(filePath, ".go") { // Not Go source? Skip
-			return nil
-		}
-		if strings.HasSuffix(filePath, "_test.go") { // Go test? Skip
-			return nil
-		}
-
-		relPath, err := filepath.Rel(projectPath, filePath)
-		if err != nil {
-			return nil
-		}
-		for _, ignorePath := range r.config.IgnorePaths {
-			if strings.HasPrefix(relPath, ignorePath) { // Part of ignored paths? Skip
-				return filepath.SkipDir
-			}
-		}
-
-		file, err := os.Open(filePath)
-		if err != nil {
-			return nil
-		}
-		defer file.Close()
-		if r.IsMockFile(file) { // Formatter says its a mock? Skip
-			return nil
-		}
-
-		packageAbsPath := filepath.Dir(filePath)
-		pack := project.PathToPackage[packageAbsPath]
-		if pack == nil {
-			pack = &lib.Package{}
-			pack.AbsPath = packageAbsPath
-			pack.PackagePath = lib.GetPackagePath(packageAbsPath)
-			project.PathToPackage[packageAbsPath] = pack
-		}
-		pack.SourceAbsPaths = append(pack.SourceAbsPaths, filePath)
-		return nil
-	})
-	if err != nil {
-		panic(err)
-	}
-	return project
+	logScanProjectResults(project)
 }
 
 // TypeCheckProject type-checks Go source code.
 func (r *Oracle) TypeCheckProject(project *lib.Project) {
-	for _, pack := range project.PathToPackage {
-		r.typeCheckSources(project, pack)
-	}
-}
-
-func (r *Oracle) typeCheckSources(project *lib.Project, pack *lib.Package) {
-	// Ignore Pain - Ignore sources which cannot be type-checked
-	defer recoverTypeCheckErrors(project, pack)()
-
-	// Build package AST from sources
-	fset := token.NewFileSet()
-	astFiles := []*ast.File{}
-	for _, sourcePath := range pack.SourceAbsPaths {
-		astFile, err := parser.ParseFile(fset, sourcePath, nil, parser.AllErrors)
-		if err != nil {
-			panic(err)
-		}
-		astFiles = append(astFiles, astFile)
-	}
-
-	// Type-check package AST
-	typeChecker := &types.Config{}
-	typeChecker.Importer = importer.Default()
-	info := &types.Info{}
-	info.Defs = map[*ast.Ident]types.Object{}
-	tPackage, err := typeChecker.Check(pack.PackagePath, fset, astFiles, info)
+	goloader := &loader.Config{}
+	goloader.AllowErrors = true
+	goloader.ParserMode = parser.AllErrors
+	goloader.Import(project.PackagePath)
+	program, err := goloader.Load()
 	if err != nil {
 		panic(err)
 	}
-	pack.Context = tPackage
 
-	// Index imports used by the package
-	pack.Imports = tPackage.Imports()
+	for _, allPackage := range program.AllPackages {
+		packagePath := allPackage.Pkg.Path()
+		if !strings.HasPrefix(packagePath, project.PackagePath) { // External dependency? Skip
+			continue
+		}
+		if strings.HasPrefix(packagePath, project.VendorPath) { // Vendor dependency? Skip
+			continue
+		}
+		interfaces := getDefinedInterfaces(&allPackage.Info)
+		num := len(interfaces)
+		if num == 0 { // 0 interfaces defined? Skip
+			log.Debugf("Ignore package %s because it has 0 interfaces", packagePath)
+			continue
+		}
 
-	// Index interfaces defined in the package
+		pack := &lib.Package{}
+		pack.PackageInfo = allPackage
+		pack.Context = allPackage.Pkg
+		pack.Interfaces = interfaces
+
+		project.Packages = append(project.Packages, pack)
+		log.Debugf("Found package %s with %d interfaces", packagePath, num)
+	}
+
+	logTypeCheckProjectResults(project)
+}
+
+// GenerateMocks generate mocks for the project
+func (r *Oracle) GenerateMocks(project *lib.Project) {
+	r.formatter.GenerateMocks(project)
+	logGenerateMocksResults(project)
+}
+
+// getDefinedInterfaces returns defined interfaces in the package.
+func getDefinedInterfaces(info *types.Info) []*lib.Interface {
+	interfaces := []*lib.Interface{}
 	for _, def := range info.Defs {
 		if def == nil {
 			continue
@@ -146,18 +111,44 @@ func (r *Oracle) typeCheckSources(project *lib.Project, pack *lib.Package) {
 			TObject:    def,
 			TInterface: interfaceDef,
 		}
-		pack.Interfaces = append(pack.Interfaces, iface)
+		interfaces = append(interfaces, iface)
 	}
-	sort.Slice(pack.Interfaces, func(i, j int) bool { return pack.Interfaces[i].TObject.Name() < pack.Interfaces[j].TObject.Name() })
+
+	sort.Slice(interfaces, func(i, j int) bool { return interfaces[i].TObject.Name() < interfaces[j].TObject.Name() })
+	return interfaces
 }
 
 func recoverTypeCheckErrors(project *lib.Project, pack *lib.Package) func() {
 	return func() {
 		if err := lib.Err(recover()); err != nil {
-			log.Error(err.ErrorStack())
-			log.Errorf(`ignoring %s due to type check errors; see log for details`, pack.PackagePath)
+			log.Errorf(err.ErrorStack())
+			log.Errorf("Ignoring %s due to type check errors; see log for details", pack.Context.Path())
 			project.AllErrors = append(project.AllErrors, err)
 			pack.Error = err
 		}
 	}
+}
+
+func logScanProjectResults(project *lib.Project) {
+	log.Infof("Scan project complete")
+	log.Infof("Project path is %s", project.ProjectAbsPath)
+	log.Infof("GOPATH is %s", project.GoAbsPath)
+	log.Infof("Project package is %s", project.PackagePath)
+	log.Infof("Project vendor path is %s", project.VendorPath)
+}
+
+func logTypeCheckProjectResults(project *lib.Project) {
+	log.Infof("Type check complete")
+	for _, pack := range project.Packages {
+		ifaces := []string{}
+		for _, iface := range pack.Interfaces {
+			ifaces = append(ifaces, iface.TObject.Name())
+		}
+		log.Infof("Type checker found %d interface(s) in package %s: %s",
+			len(ifaces), pack.Context.Path(), strings.Join(ifaces, ", "))
+	}
+}
+
+func logGenerateMocksResults(project *lib.Project) {
+	log.Infof("Generate mocks complete")
 }
