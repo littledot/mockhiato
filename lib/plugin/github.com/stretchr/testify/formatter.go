@@ -48,16 +48,15 @@ func (r *testifyFormatter) GenerateMocks(project *lib.Project) {
 	for _, pack := range project.Packages {
 		r.generateMock(project, pack)
 	}
-
 }
 
 func (r *testifyFormatter) generateMock(project *lib.Project, pack *lib.Package) {
 	if len(pack.Interfaces) == 0 { // Nothing to mock? Return early
 		return
 	}
-
+	log.Debugf("Generating mocks for %s", pack.Context.Path())
 	mockPath := filepath.Join(project.GoSrcAbsPath, pack.Context.Path(), r.config.MockFileName)
-	log.Debugf("Generating mocks for %s at %s", pack.Context.Path(), mockPath)
+	log.Debugf("Creating file: %s", mockPath)
 	mockFile, err := os.Create(mockPath)
 	if err != nil {
 		panic(err)
@@ -71,9 +70,11 @@ func (r *testifyFormatter) generateMock(project *lib.Project, pack *lib.Package)
 
 	// Write package
 	packageName := pack.Context.Name()
+	log.Debugf("Writing package: %s", packageName)
 	buf.WriteString(fmt.Sprintf("package %s\n", packageName))
 
 	// Write magic string
+	log.Debugf("Writing magic: %s", magic)
 	buf.WriteString(magic + "\n")
 
 	// Write imports
@@ -81,6 +82,7 @@ func (r *testifyFormatter) generateMock(project *lib.Project, pack *lib.Package)
 	for depPath, depAlias := range pf.PathToAlias {
 		imports = append(imports, fmt.Sprintf(`%s "%s"`, depAlias, strings.TrimPrefix(depPath, project.VendorPath+"/")))
 	}
+	log.Debugf("Writing imports: %s", strings.Join(imports, ", "))
 	buf.WriteString("import(\n")
 	buf.WriteString(strings.Join(imports, "\n"))
 	buf.WriteString("\n)\n")
@@ -89,6 +91,7 @@ func (r *testifyFormatter) generateMock(project *lib.Project, pack *lib.Package)
 		// Write struct
 		interfaceName := iface.TObject.Name()
 		mockName := interfaceName + "Mock"
+		log.Debugf("Writing struct: %s", mockName)
 		buf.WriteString(fmt.Sprintf("// %s implements %s.%s\n", mockName, packageName, interfaceName))
 		buf.WriteString(fmt.Sprintf("type %s struct { mock.Mock }\n", mockName))
 
@@ -122,6 +125,7 @@ func (r *testifyFormatter) generateMock(project *lib.Project, pack *lib.Package)
 				verifyReturnLines = append(verifyReturnLines, fmt.Sprintf("%s := ret.Get(%d).(%s)\n", varName, j, pf.ObjectTypeString(result)))
 			}
 
+			log.Debugf("Writing method: %s()", method.Name())
 			commentLine := fmt.Sprintf("// %s implements (%s.%s).%s\n", method.Name(), packageName, interfaceName, method.Name())
 			signatureLine := fmt.Sprintf("func (r *%s) %s(%s) (%s) {\n", mockName, method.Name(), strings.Join(paramExprs, ", "), strings.Join(returnTypes, ","))
 			verifyInvokedLine := fmt.Sprintf("r.Called(%s)\n", strings.Join(paramNames, ", "))
@@ -144,8 +148,11 @@ func (r *testifyFormatter) generateMock(project *lib.Project, pack *lib.Package)
 	mockFile.Close()
 
 	// Format generated code
+	log.Debugf("Formatting file %s", mockPath)
 	cmd := exec.Command("goimports", "-w", mockPath)
 	if stdout, err := cmd.CombinedOutput(); err != nil {
 		panic(string(stdout))
 	}
+
+	project.GenAbsPaths = append(project.GenAbsPaths, mockPath)
 }

@@ -14,4 +14,6 @@ func Run(config lib.Config) {
 	oracle.ScanProject(project)
 	oracle.TypeCheckProject(project)
 	oracle.GenerateMocks(project)
+
+	log.Infof("Enjoy!")
 }

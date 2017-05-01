@@ -28,14 +28,18 @@ type Project struct {
 	GoAbsPath string
 	// GoSrcAbsPath is $GOPATH/src.
 	GoSrcAbsPath string
-
 	// PackagePath is the project's package path, which should be the relative path to $GOPATH/src.
 	PackagePath string
 	// VendorPath is the project's vedor path, which should be PackagePath/vendor
 	VendorPath string
 
-	Program  *loader.Program
+	// Program is the loaded project
+	Program *loader.Program
+	// Packages is a list of packages with interfaces that can be mocked.
 	Packages []*Package
+
+	//GenPaths contains a list of generated file paths
+	GenAbsPaths []string
 }
 
 // NewProject creates a new Project.

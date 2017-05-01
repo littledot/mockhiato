@@ -143,4 +143,7 @@ func logTypeCheckProjectResults(project *lib.Project) {
 
 func logGenerateMocksResults(project *lib.Project) {
 	log.Infof("Generate mocks complete")
+	for _, path := range project.GenAbsPaths {
+		log.Infof("Generated %s", path)
+	}
 }
