@@ -11,8 +11,8 @@ import (
 	"strconv"
 	"strings"
 
+	log "github.com/sirupsen/logrus"
 	"gitlab.com/littledot/mockhiato/lib"
-	"gitlab.com/littledot/mockhiato/lib/log"
 )
 
 const (
