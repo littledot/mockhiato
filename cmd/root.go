@@ -1,6 +1,8 @@
 package cmd
 
 import (
+	"strings"
+
 	"gitlab.com/littledot/mockhiato/lib"
 
 	log "github.com/sirupsen/logrus"
@@ -66,6 +68,9 @@ func getConfig(cmd *cobra.Command) lib.Config {
 	}
 	if config.Verbose {
 		log.SetLevel(log.DebugLevel)
+	}
+	if !strings.HasSuffix(config.MockFileName, ".go") { // Ensure mock files end with ".go"
+		config.MockFileName += ".go"
 	}
 	log.Debugf("Configs: %#v", config)
 	return config
