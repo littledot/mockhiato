@@ -32,6 +32,7 @@ func NewOracle(config lib.Config) *Oracle {
 
 // ScanProject walks the project directory, indexing valid Go source code
 func (r *Oracle) ScanProject(project *lib.Project) {
+	log.Debugf("Scanning project...")
 	projectPath, err := filepath.Abs(r.config.ProjectPath)
 	if err != nil {
 		panic(err)
@@ -50,6 +51,7 @@ func (r *Oracle) ScanProject(project *lib.Project) {
 
 // TypeCheckProject type-checks Go source code.
 func (r *Oracle) TypeCheckProject(project *lib.Project) {
+	log.Debugf("Type checking project...")
 	goloader := &loader.Config{}
 	goloader.AllowErrors = true
 	goloader.ParserMode = parser.AllErrors
@@ -88,6 +90,7 @@ func (r *Oracle) TypeCheckProject(project *lib.Project) {
 
 // GenerateMocks generate mocks for the project
 func (r *Oracle) GenerateMocks(project *lib.Project) {
+	log.Debugf("Generating mocks...")
 	r.formatter.GenerateMocks(project)
 	logGenerateMocksResults(project)
 }
@@ -116,17 +119,6 @@ func getDefinedInterfaces(info *types.Info) []*lib.Interface {
 
 	sort.Slice(interfaces, func(i, j int) bool { return interfaces[i].TObject.Name() < interfaces[j].TObject.Name() })
 	return interfaces
-}
-
-func recoverTypeCheckErrors(project *lib.Project, pack *lib.Package) func() {
-	return func() {
-		if err := lib.Err(recover()); err != nil {
-			log.Errorf(err.ErrorStack())
-			log.Errorf("Ignoring %s due to type check errors; see log for details", pack.Context.Path())
-			project.AllErrors = append(project.AllErrors, err)
-			pack.Error = err
-		}
-	}
 }
 
 func logScanProjectResults(project *lib.Project) {

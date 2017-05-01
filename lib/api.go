@@ -37,8 +37,6 @@ type Project struct {
 
 	Program  *loader.Program
 	Packages []*Package
-
-	AllErrors []error
 }
 
 // NewProject creates a new Project.
@@ -54,8 +52,6 @@ type Package struct {
 	Context *types.Package
 	// Interfaces contains interface definitions found in the package.
 	Interfaces []*Interface
-
-	Error error
 }
 
 // Interface contains metadata for an interface definition. Formatters rely on this to generate mocks.

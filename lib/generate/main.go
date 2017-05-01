@@ -7,7 +7,7 @@ import (
 
 // Run executes the command.
 func Run(config lib.Config) {
-	log.Info("Running generate")
+	log.Infof("Running generate")
 
 	project := &lib.Project{}
 	oracle := NewOracle(config)
