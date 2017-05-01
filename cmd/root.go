@@ -64,6 +64,9 @@ func getConfig(cmd *cobra.Command) lib.Config {
 	if err := viper.Unmarshal(&config); err != nil {
 		panic(err)
 	}
-	log.Infof("Configs: %#v", config)
+	if config.Verbose {
+		log.SetLevel(log.DebugLevel)
+	}
+	log.Debugf("Configs: %#v", config)
 	return config
 }
