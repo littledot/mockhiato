@@ -4,9 +4,9 @@ import (
 	"bufio"
 	"bytes"
 	"fmt"
+	"go/format"
 	"go/types"
 	"os"
-	"os/exec"
 	"path/filepath"
 	"strconv"
 	"strings"
@@ -144,15 +144,14 @@ func (r *testifyFormatter) generateMock(project *lib.Project, pack *lib.Package)
 		}
 	}
 
-	mockFile.Write(buf.Bytes())
-	mockFile.Close()
-
 	// Format generated code
-	log.Debugf("Formatting file %s", mockPath)
-	cmd := exec.Command("goimports", "-w", mockPath)
-	if stdout, err := cmd.CombinedOutput(); err != nil {
-		panic(string(stdout))
+	sourceCode, err := format.Source(buf.Bytes())
+	if err != nil {
+		panic(err)
 	}
+
+	mockFile.Write(sourceCode)
+	mockFile.Close()
 
 	project.GenAbsPaths = append(project.GenAbsPaths, mockPath)
 }

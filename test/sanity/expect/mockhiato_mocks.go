@@ -4,11 +4,10 @@ package example
 import (
 	bytes "bytes"
 	json "encoding/json"
+	mock "github.com/stretchr/testify/mock"
 	png "image/png"
 	os "os"
 	time "time"
-
-	mock "github.com/stretchr/testify/mock"
 )
 
 // AMock implements example.A
