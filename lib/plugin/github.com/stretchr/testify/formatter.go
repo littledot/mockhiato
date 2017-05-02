@@ -66,7 +66,9 @@ func (r *testifyFormatter) generateMock(project *lib.Project, pack *lib.Package)
 	buf := &bytes.Buffer{}
 	pf := lib.NewPackageFormatter(pack.Context)
 	pf.RecordDependency(types.NewPackage("github.com/stretchr/testify/mock", "mock"))
-	pf.IndexImports(pack.Context)
+	for _, iface := range pack.Interfaces {
+		pf.IndexInterface(iface.TInterface)
+	}
 
 	// Write package
 	packageName := pack.Context.Name()
