@@ -7,13 +7,11 @@ import (
 	"os"
 )
 
-// A A
+// A this package contains 2 interfaces that needs to be mocked.
 type A interface {
 	Hello(a string) (b int, err error)
 	World(c int, a ...string) (b map[int]interface{})
 	Yes(fi os.FileInfo) (pnge *png.Encoder, err error)
-	B
-	os.FileInfo
 }
 
 // B B

@@ -7,7 +7,6 @@ import (
 	mock "github.com/stretchr/testify/mock"
 	png "image/png"
 	os "os"
-	time "time"
 )
 
 // AMock implements example.A
@@ -19,55 +18,6 @@ func (r *AMock) Hello(p0 string) (int, error) {
 	ret0 := ret.Get(0).(int)
 	ret1 := ret.Get(1).(error)
 	return ret0, ret1
-}
-
-// IsDir implements (example.A).IsDir
-func (r *AMock) IsDir() bool {
-	ret := r.Called()
-	ret0 := ret.Get(0).(bool)
-	return ret0
-}
-
-// ModTime implements (example.A).ModTime
-func (r *AMock) ModTime() time.Time {
-	ret := r.Called()
-	ret0 := ret.Get(0).(time.Time)
-	return ret0
-}
-
-// Mode implements (example.A).Mode
-func (r *AMock) Mode() os.FileMode {
-	ret := r.Called()
-	ret0 := ret.Get(0).(os.FileMode)
-	return ret0
-}
-
-// Name implements (example.A).Name
-func (r *AMock) Name() string {
-	ret := r.Called()
-	ret0 := ret.Get(0).(string)
-	return ret0
-}
-
-// No implements (example.A).No
-func (r *AMock) No(p0 *json.Decoder) *bytes.Buffer {
-	ret := r.Called(p0)
-	ret0 := ret.Get(0).(*bytes.Buffer)
-	return ret0
-}
-
-// Size implements (example.A).Size
-func (r *AMock) Size() int64 {
-	ret := r.Called()
-	ret0 := ret.Get(0).(int64)
-	return ret0
-}
-
-// Sys implements (example.A).Sys
-func (r *AMock) Sys() interface{} {
-	ret := r.Called()
-	ret0 := ret.Get(0).(interface{})
-	return ret0
 }
 
 // World implements (example.A).World
