@@ -1,8 +1,9 @@
 language: go
+
 go:
   # - 1.7.x # undefined: sort.Slice
   - 1.8.x
-  - stable
+  # - stable # https://travis-ci.org/littledot/mockhiato/jobs/228108737 stable is down
   - master
 
 go_import_path: gitlab.com/littledot/mockhiato
