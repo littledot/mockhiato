@@ -8,5 +8,7 @@ go:
   - master
   - tip
 
+go_import_path: gitlab.com/littledot/mockhiato
+
 script:
   - go test -v ./...
