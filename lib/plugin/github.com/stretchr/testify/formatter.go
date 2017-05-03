@@ -12,7 +12,7 @@ import (
 	"strings"
 
 	log "github.com/sirupsen/logrus"
-	"gitlab.com/littledot/mockhiato/lib"
+	"sdchang.com/mockhiato/lib"
 )
 
 const (

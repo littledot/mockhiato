@@ -2,7 +2,7 @@ package generate
 
 import (
 	log "github.com/sirupsen/logrus"
-	"gitlab.com/littledot/mockhiato/lib"
+	"sdchang.com/mockhiato/lib"
 )
 
 // Run executes the command.

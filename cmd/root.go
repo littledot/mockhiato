@@ -3,7 +3,7 @@ package cmd
 import (
 	"strings"
 
-	"gitlab.com/littledot/mockhiato/lib"
+	"sdchang.com/mockhiato/lib"
 
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"

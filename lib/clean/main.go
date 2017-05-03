@@ -6,8 +6,8 @@ import (
 	"path/filepath"
 	"strings"
 
-	"gitlab.com/littledot/mockhiato/lib"
-	"gitlab.com/littledot/mockhiato/lib/plugin/github.com/stretchr/testify"
+	"sdchang.com/mockhiato/lib"
+	"sdchang.com/mockhiato/lib/plugin/github.com/stretchr/testify"
 )
 
 // Run executes the command.

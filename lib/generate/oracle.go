@@ -10,8 +10,8 @@ import (
 	"golang.org/x/tools/go/loader"
 
 	log "github.com/sirupsen/logrus"
-	"gitlab.com/littledot/mockhiato/lib"
-	"gitlab.com/littledot/mockhiato/lib/plugin/github.com/stretchr/testify"
+	"sdchang.com/mockhiato/lib"
+	"sdchang.com/mockhiato/lib/plugin/github.com/stretchr/testify"
 )
 
 // Oracle parses Go projects, looking for interfaces to mock.

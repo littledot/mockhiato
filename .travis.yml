@@ -6,7 +6,7 @@ go:
   # - stable # https://travis-ci.org/littledot/mockhiato/jobs/228108737 stable is down
   - master
 
-go_import_path: gitlab.com/littledot/mockhiato
+go_import_path: sdchang.com/mockhiato
 
 script:
   - go test -v ./...
