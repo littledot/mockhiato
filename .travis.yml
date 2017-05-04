@@ -15,3 +15,8 @@ go_import_path: sdchang.com/mockhiato
 
 script:
   - go test -v ./...
+
+notifications:
+  slack:
+    rooms:
+      - mockhiato:ADHPhjuApyXvWh4OKFYs0Hrx#bot-travis
