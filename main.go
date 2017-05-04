@@ -15,8 +15,8 @@
 package main
 
 import (
-	"sdchang.com/mockhiato/cmd"
-	"sdchang.com/mockhiato/lib"
+	"github.com/littledot/mockhiato/cmd"
+	"github.com/littledot/mockhiato/lib"
 )
 
 func main() {

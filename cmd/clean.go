@@ -1,8 +1,8 @@
 package cmd
 
 import (
+	"github.com/littledot/mockhiato/lib/clean"
 	"github.com/spf13/cobra"
-	"sdchang.com/mockhiato/lib/clean"
 )
 
 // cleanCmd represents the clean command

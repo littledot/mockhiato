@@ -1,8 +1,8 @@
 package cmd
 
 import (
+	"github.com/littledot/mockhiato/lib/generate"
 	"github.com/spf13/cobra"
-	"sdchang.com/mockhiato/lib/generate"
 )
 
 // generateCmd represents the generate command

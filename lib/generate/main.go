@@ -1,8 +1,8 @@
 package generate
 
 import (
+	"github.com/littledot/mockhiato/lib"
 	log "github.com/sirupsen/logrus"
-	"sdchang.com/mockhiato/lib"
 )
 
 // Run executes the command.
