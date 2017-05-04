@@ -55,13 +55,6 @@ func (r *testifyFormatter) generateMock(project *lib.Project, pack *lib.Package)
 		return
 	}
 	log.Debugf("Generating mocks for %s", pack.Context.Path())
-	mockPath := filepath.Join(project.GoSrcAbsPath, pack.Context.Path(), r.config.MockFileName)
-	log.Debugf("Creating file: %s", mockPath)
-	mockFile, err := os.Create(mockPath)
-	if err != nil {
-		panic(err)
-	}
-	defer mockFile.Close()
 
 	buf := &bytes.Buffer{}
 	pf := lib.NewPackageFormatter(pack.Context)
@@ -145,6 +138,14 @@ func (r *testifyFormatter) generateMock(project *lib.Project, pack *lib.Package)
 			buf.WriteString(returnLine)
 		}
 	}
+
+	mockPath := filepath.Join(project.GoSrcAbsPath, pack.Context.Path(), r.config.MockFileName)
+	log.Debugf("Creating file: %s", mockPath)
+	mockFile, err := os.Create(mockPath)
+	if err != nil {
+		panic(err)
+	}
+	defer mockFile.Close()
 
 	// Format generated code
 	sourceCode, err := format.Source(buf.Bytes())
