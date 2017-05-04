@@ -17,8 +17,22 @@ go get -u github.com/littledot/mockhiato
 
 ## Usage
 
-Run `mockhiato generate` to generate mocks for your Go project.
+Mockhiato's main feature is to manage mocks for your Go project.
 
-Run `mockhiato clean` to delete generated mocks.
+```
+mockhiato generate
+```
 
-Run `mockhiato -h` for advanced usage tips.
+`generate` creates mocks for the project located at the current working directory. Mockhiato currently supports `github.com/stretchr/testify/mock`. Open an issue if you would like another mocking framework to be supported.
+
+```
+mockhiato clean
+```
+
+`clean` deletes generated mocks.
+
+```
+mockhiato generate -h
+```
+
+Append `-h` to commands for more details on other usages.
