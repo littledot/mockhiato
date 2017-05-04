@@ -117,9 +117,15 @@ func getDefinedInterfaces(info *types.Info) []*lib.Interface {
 		interfaces = append(interfaces, iface)
 	}
 
-	sort.Slice(interfaces, func(i, j int) bool { return interfaces[i].TObject.Name() < interfaces[j].TObject.Name() })
+	sort.Sort(byInterfaceName(interfaces))
 	return interfaces
 }
+
+type byInterfaceName []*lib.Interface
+
+func (r byInterfaceName) Len() int           { return len(r) }
+func (r byInterfaceName) Swap(i, j int)      { r[i], r[j] = r[j], r[i] }
+func (r byInterfaceName) Less(i, j int) bool { return r[i].TObject.Name() < r[j].TObject.Name() }
 
 func logScanProjectResults(project *lib.Project) {
 	log.Infof("Scan project complete")
