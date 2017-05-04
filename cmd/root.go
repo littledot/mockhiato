@@ -15,8 +15,8 @@ var cfgFile string
 // RootCmd represents the base command when called without any subcommands
 var RootCmd = &cobra.Command{
 	Use:   "mockhiato",
-	Short: "A mocking framework for Go",
-	Long:  `A mocking framework for Go.`,
+	Short: "A mock generation CLI tool for the Go",
+	Long:  `Mockhiato is a mock generation CLI tool for the Go programming language. It is designed to be fast, configurable and correct.`,
 	// Uncomment the following line if your bare application
 	// has an action associated with it:
 	// Run: func(cmd *cobra.Command, args []string) {
