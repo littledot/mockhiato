@@ -5,7 +5,7 @@
 
 Mockhiato is a mock generation CLI tool for the Go programming language. It is designed to be fast, configurable and correct.
 
-![asciicast](https://cloud.githubusercontent.com/assets/1559794/25729792/909e71ae-30ec-11e7-9914-c3aa92f5c829.gif)
+![asciicast](https://cloud.githubusercontent.com/assets/14984066/25729923/7cd45c64-30ed-11e7-8e29-9145085e4748.gif)
 
 ## Installation
 
