@@ -17,7 +17,7 @@ func GetPackagePath(path string) string {
 	}
 	const src = "src/"
 	srcPos := strings.Index(absPath, src)
-	return absPath[srcPos+len(src) : len(absPath)]
+	return absPath[srcPos+len(src):]
 }
 
 // Unpanic recovers from a panic.

@@ -43,7 +43,7 @@ func (r *Oracle) ScanProject(project *lib.Project) {
 	srcPos := strings.Index(projectPath, src)
 	project.GoAbsPath = projectPath[0 : srcPos-1]
 	project.GoSrcAbsPath = projectPath[0 : srcPos+len(src)-1]
-	project.PackagePath = projectPath[srcPos+len(src) : len(projectPath)]
+	project.PackagePath = projectPath[srcPos+len(src):]
 	project.VendorPath = filepath.Join(project.PackagePath, "vendor")
 
 	logScanProjectResults(project)
