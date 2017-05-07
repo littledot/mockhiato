@@ -25,7 +25,7 @@ func Unpanic() func() {
 	return func() {
 		if err := Err(recover()); err != nil {
 			log.Error(err.ErrorStack())
-			log.Error("Mockhiato encountered an error! If this seems like a bug, please report it to ...")
+			log.Error("Mockhiato encountered an error! If this seems like a bug, please report it to https://github.com/littledot/mockhiato/issues/new")
 		}
 	}
 }
