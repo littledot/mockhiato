@@ -7,8 +7,8 @@ import (
 	"os"
 )
 
-// A this package contains 2 interfaces that needs to be mocked.
-type A interface {
+// Target contains 2 interfaces that needs to be mocked.
+type Target interface {
 	Hello(a string) (b int, err error)
 	World(c int, a ...string) (b map[int]interface{})
 	Yes(fi os.FileInfo) (pnge *png.Encoder, err error)

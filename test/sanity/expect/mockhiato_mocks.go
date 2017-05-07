@@ -9,32 +9,6 @@ import (
 	os "os"
 )
 
-// AMock implements example.A
-type AMock struct{ mock.Mock }
-
-// Hello implements (example.A).Hello
-func (r *AMock) Hello(p0 string) (int, error) {
-	ret := r.Called(p0)
-	ret0 := ret.Get(0).(int)
-	ret1 := ret.Get(1).(error)
-	return ret0, ret1
-}
-
-// World implements (example.A).World
-func (r *AMock) World(p0 int, p1 ...string) map[int]interface{} {
-	ret := r.Called(p0, p1)
-	ret0 := ret.Get(0).(map[int]interface{})
-	return ret0
-}
-
-// Yes implements (example.A).Yes
-func (r *AMock) Yes(p0 os.FileInfo) (*png.Encoder, error) {
-	ret := r.Called(p0)
-	ret0 := ret.Get(0).(*png.Encoder)
-	ret1 := ret.Get(1).(error)
-	return ret0, ret1
-}
-
 // BMock implements example.B
 type BMock struct{ mock.Mock }
 
@@ -43,4 +17,30 @@ func (r *BMock) No(p0 *json.Decoder) *bytes.Buffer {
 	ret := r.Called(p0)
 	ret0 := ret.Get(0).(*bytes.Buffer)
 	return ret0
+}
+
+// TargetMock implements example.Target
+type TargetMock struct{ mock.Mock }
+
+// Hello implements (example.Target).Hello
+func (r *TargetMock) Hello(p0 string) (int, error) {
+	ret := r.Called(p0)
+	ret0 := ret.Get(0).(int)
+	ret1 := ret.Get(1).(error)
+	return ret0, ret1
+}
+
+// World implements (example.Target).World
+func (r *TargetMock) World(p0 int, p1 ...string) map[int]interface{} {
+	ret := r.Called(p0, p1)
+	ret0 := ret.Get(0).(map[int]interface{})
+	return ret0
+}
+
+// Yes implements (example.Target).Yes
+func (r *TargetMock) Yes(p0 os.FileInfo) (*png.Encoder, error) {
+	ret := r.Called(p0)
+	ret0 := ret.Get(0).(*png.Encoder)
+	ret1 := ret.Get(1).(error)
+	return ret0, ret1
 }

@@ -7,61 +7,61 @@ import (
 	time "time"
 )
 
-// AMock implements example.A
-type AMock struct{ mock.Mock }
+// TargetMock implements example.Target
+type TargetMock struct{ mock.Mock }
 
-// Close implements (example.A).Close
-func (r *AMock) Close() error {
+// Close implements (example.Target).Close
+func (r *TargetMock) Close() error {
 	ret := r.Called()
 	ret0 := ret.Get(0).(error)
 	return ret0
 }
 
-// LocalAddr implements (example.A).LocalAddr
-func (r *AMock) LocalAddr() net.Addr {
+// LocalAddr implements (example.Target).LocalAddr
+func (r *TargetMock) LocalAddr() net.Addr {
 	ret := r.Called()
 	ret0 := ret.Get(0).(net.Addr)
 	return ret0
 }
 
-// Read implements (example.A).Read
-func (r *AMock) Read(p0 []byte) (int, error) {
+// Read implements (example.Target).Read
+func (r *TargetMock) Read(p0 []byte) (int, error) {
 	ret := r.Called(p0)
 	ret0 := ret.Get(0).(int)
 	ret1 := ret.Get(1).(error)
 	return ret0, ret1
 }
 
-// RemoteAddr implements (example.A).RemoteAddr
-func (r *AMock) RemoteAddr() net.Addr {
+// RemoteAddr implements (example.Target).RemoteAddr
+func (r *TargetMock) RemoteAddr() net.Addr {
 	ret := r.Called()
 	ret0 := ret.Get(0).(net.Addr)
 	return ret0
 }
 
-// SetDeadline implements (example.A).SetDeadline
-func (r *AMock) SetDeadline(p0 time.Time) error {
+// SetDeadline implements (example.Target).SetDeadline
+func (r *TargetMock) SetDeadline(p0 time.Time) error {
 	ret := r.Called(p0)
 	ret0 := ret.Get(0).(error)
 	return ret0
 }
 
-// SetReadDeadline implements (example.A).SetReadDeadline
-func (r *AMock) SetReadDeadline(p0 time.Time) error {
+// SetReadDeadline implements (example.Target).SetReadDeadline
+func (r *TargetMock) SetReadDeadline(p0 time.Time) error {
 	ret := r.Called(p0)
 	ret0 := ret.Get(0).(error)
 	return ret0
 }
 
-// SetWriteDeadline implements (example.A).SetWriteDeadline
-func (r *AMock) SetWriteDeadline(p0 time.Time) error {
+// SetWriteDeadline implements (example.Target).SetWriteDeadline
+func (r *TargetMock) SetWriteDeadline(p0 time.Time) error {
 	ret := r.Called(p0)
 	ret0 := ret.Get(0).(error)
 	return ret0
 }
 
-// Write implements (example.A).Write
-func (r *AMock) Write(p0 []byte) (int, error) {
+// Write implements (example.Target).Write
+func (r *TargetMock) Write(p0 []byte) (int, error) {
 	ret := r.Called(p0)
 	ret0 := ret.Get(0).(int)
 	ret1 := ret.Get(1).(error)
