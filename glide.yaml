@@ -9,6 +9,5 @@ import:
   - spew
 - package: github.com/sirupsen/logrus
   version: v0.11.5
-- package: github.com/stretchr/testify
-  version: v1.1.4
 - package: github.com/go-errors/errors
+- package: github.com/stretchr/testify

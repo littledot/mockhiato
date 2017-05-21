@@ -13,57 +13,87 @@ type TargetMock struct{ mock.Mock }
 // Close implements (example.Target).Close
 func (r *TargetMock) Close() error {
 	ret := r.Called()
-	ret0 := ret.Get(0).(error)
+	var ret0 error
+	if a := ret.Get(0); a != nil {
+		ret0 = a.(error)
+	}
 	return ret0
 }
 
 // LocalAddr implements (example.Target).LocalAddr
 func (r *TargetMock) LocalAddr() net.Addr {
 	ret := r.Called()
-	ret0 := ret.Get(0).(net.Addr)
+	var ret0 net.Addr
+	if a := ret.Get(0); a != nil {
+		ret0 = a.(net.Addr)
+	}
 	return ret0
 }
 
 // Read implements (example.Target).Read
 func (r *TargetMock) Read(p0 []byte) (int, error) {
 	ret := r.Called(p0)
-	ret0 := ret.Get(0).(int)
-	ret1 := ret.Get(1).(error)
+	var ret0 int
+	if a := ret.Get(0); a != nil {
+		ret0 = a.(int)
+	}
+	var ret1 error
+	if a := ret.Get(1); a != nil {
+		ret1 = a.(error)
+	}
 	return ret0, ret1
 }
 
 // RemoteAddr implements (example.Target).RemoteAddr
 func (r *TargetMock) RemoteAddr() net.Addr {
 	ret := r.Called()
-	ret0 := ret.Get(0).(net.Addr)
+	var ret0 net.Addr
+	if a := ret.Get(0); a != nil {
+		ret0 = a.(net.Addr)
+	}
 	return ret0
 }
 
 // SetDeadline implements (example.Target).SetDeadline
 func (r *TargetMock) SetDeadline(p0 time.Time) error {
 	ret := r.Called(p0)
-	ret0 := ret.Get(0).(error)
+	var ret0 error
+	if a := ret.Get(0); a != nil {
+		ret0 = a.(error)
+	}
 	return ret0
 }
 
 // SetReadDeadline implements (example.Target).SetReadDeadline
 func (r *TargetMock) SetReadDeadline(p0 time.Time) error {
 	ret := r.Called(p0)
-	ret0 := ret.Get(0).(error)
+	var ret0 error
+	if a := ret.Get(0); a != nil {
+		ret0 = a.(error)
+	}
 	return ret0
 }
 
 // SetWriteDeadline implements (example.Target).SetWriteDeadline
 func (r *TargetMock) SetWriteDeadline(p0 time.Time) error {
 	ret := r.Called(p0)
-	ret0 := ret.Get(0).(error)
+	var ret0 error
+	if a := ret.Get(0); a != nil {
+		ret0 = a.(error)
+	}
 	return ret0
 }
 
 // Write implements (example.Target).Write
 func (r *TargetMock) Write(p0 []byte) (int, error) {
 	ret := r.Called(p0)
-	ret0 := ret.Get(0).(int)
-	ret1 := ret.Get(1).(error)
+	var ret0 int
+	if a := ret.Get(0); a != nil {
+		ret0 = a.(int)
+	}
+	var ret1 error
+	if a := ret.Get(1); a != nil {
+		ret1 = a.(error)
+	}
 	return ret0, ret1
 }

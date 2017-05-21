@@ -114,10 +114,12 @@ func (r *testifyFormatter) generateMock(project *lib.Project, pack *lib.Package)
 			verifyReturnLines := []string{}
 			for j := 0; j < signature.Results().Len(); j++ {
 				result := signature.Results().At(j)
+				resultTypeString := pf.ObjectTypeString(result)
 				varName := "ret" + strconv.Itoa(j)
 				returnNames = append(returnNames, varName)
-				returnTypes = append(returnTypes, pf.ObjectTypeString(result))
-				verifyReturnLines = append(verifyReturnLines, fmt.Sprintf("%s := ret.Get(%d).(%s)\n", varName, j, pf.ObjectTypeString(result)))
+				returnTypes = append(returnTypes, resultTypeString)
+				verifyReturnLine := fmt.Sprintf("var %s %s; if a := ret.Get(%d); a != nil { %s = a.(%s) }\n", varName, resultTypeString, j, varName, resultTypeString)
+				verifyReturnLines = append(verifyReturnLines, verifyReturnLine)
 			}
 
 			log.Debugf("Writing method: %s()", method.Name())
