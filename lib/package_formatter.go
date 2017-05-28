@@ -7,17 +7,17 @@ import (
 
 // PackageFormatter indexes packages and generates package aliases if required.
 type PackageFormatter struct {
-	Context     *types.Package
+	ContextPath string
 	PathToAlias map[string]string
 	usedAliases map[string]int
 }
 
 // NewPackageFormatter creates a new PackageFormatter.
-func NewPackageFormatter(context *types.Package) *PackageFormatter {
+func NewPackageFormatter(contextPath string) *PackageFormatter {
 	return &PackageFormatter{
-		Context:     context,
-		PathToAlias: map[string]string{},
-		usedAliases: map[string]int{},
+		contextPath,
+		map[string]string{},
+		map[string]int{},
 	}
 }
 
@@ -56,7 +56,7 @@ func (r *PackageFormatter) IndexTuple(tTuple *types.Tuple) {
 
 // RecordDependency indexes tPackage as a dependency and returns its name.
 func (r *PackageFormatter) RecordDependency(tPackage *types.Package) string {
-	if tPackage.Path() == r.Context.Path() {
+	if tPackage.Path() == r.ContextPath {
 		return ""
 	}
 

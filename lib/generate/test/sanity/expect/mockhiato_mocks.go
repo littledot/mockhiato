@@ -5,8 +5,6 @@ import (
 	bytes "bytes"
 	json "encoding/json"
 	mock "github.com/stretchr/testify/mock"
-	png "image/png"
-	os "os"
 )
 
 // BMock implements example.B
@@ -54,11 +52,11 @@ func (r *TargetMock) Byte(p0 byte, p1 rune, p2 string) (byte, rune, string) {
 }
 
 // Chan implements (example.Target).Chan
-func (r *TargetMock) Chan(p0 chan int) chan error {
+func (r *TargetMock) Chan(p0 chan int) chan bool {
 	ret := r.Called(p0)
-	var ret0 chan error
+	var ret0 chan bool
 	if a := ret.Get(0); a != nil {
-		ret0 = a.(chan error)
+		ret0 = a.(chan bool)
 	}
 	return ret0
 }
@@ -77,16 +75,6 @@ func (r *TargetMock) Complex(p0 complex64, p1 complex128) (complex64, complex128
 	return ret0, ret1
 }
 
-// Error implements (example.Target).Error
-func (r *TargetMock) Error(p0 error) error {
-	ret := r.Called(p0)
-	var ret0 error
-	if a := ret.Get(0); a != nil {
-		ret0 = a.(error)
-	}
-	return ret0
-}
-
 // Float implements (example.Target).Float
 func (r *TargetMock) Float(p0 float32, p1 float64) (float32, float64) {
 	ret := r.Called(p0, p1)
@@ -102,25 +90,25 @@ func (r *TargetMock) Float(p0 float32, p1 float64) (float32, float64) {
 }
 
 // Func implements (example.Target).Func
-func (r *TargetMock) Func(p0 func(int) error) func(int) error {
+func (r *TargetMock) Func(p0 func(int) bool) func(int) bool {
 	ret := r.Called(p0)
-	var ret0 func(int) error
+	var ret0 func(int) bool
 	if a := ret.Get(0); a != nil {
-		ret0 = a.(func(int) error)
+		ret0 = a.(func(int) bool)
 	}
 	return ret0
 }
 
 // Hello implements (example.Target).Hello
-func (r *TargetMock) Hello(p0 string) (int, error) {
+func (r *TargetMock) Hello(p0 string) (int, bool) {
 	ret := r.Called(p0)
 	var ret0 int
 	if a := ret.Get(0); a != nil {
 		ret0 = a.(int)
 	}
-	var ret1 error
+	var ret1 bool
 	if a := ret.Get(1); a != nil {
-		ret1 = a.(error)
+		ret1 = a.(bool)
 	}
 	return ret0, ret1
 }
@@ -162,11 +150,11 @@ func (r *TargetMock) Interface(p0 interface{}) interface{} {
 }
 
 // Map implements (example.Target).Map
-func (r *TargetMock) Map(p0 map[int]error) map[int]error {
+func (r *TargetMock) Map(p0 map[int]bool) map[int]bool {
 	ret := r.Called(p0)
-	var ret0 map[int]error
+	var ret0 map[int]bool
 	if a := ret.Get(0); a != nil {
-		ret0 = a.(map[int]error)
+		ret0 = a.(map[int]bool)
 	}
 	return ret0
 }
@@ -182,11 +170,11 @@ func (r *TargetMock) Ptr(p0 uintptr) uintptr {
 }
 
 // Slice implements (example.Target).Slice
-func (r *TargetMock) Slice(p0 []int) []error {
+func (r *TargetMock) Slice(p0 []int) []bool {
 	ret := r.Called(p0)
-	var ret0 []error
+	var ret0 []bool
 	if a := ret.Get(0); a != nil {
-		ret0 = a.([]error)
+		ret0 = a.([]bool)
 	}
 	return ret0
 }
@@ -225,18 +213,4 @@ func (r *TargetMock) World(p0 int, p1 ...string) map[int]interface{} {
 		ret0 = a.(map[int]interface{})
 	}
 	return ret0
-}
-
-// Yes implements (example.Target).Yes
-func (r *TargetMock) Yes(p0 os.FileInfo) (*png.Encoder, error) {
-	ret := r.Called(p0)
-	var ret0 *png.Encoder
-	if a := ret.Get(0); a != nil {
-		ret0 = a.(*png.Encoder)
-	}
-	var ret1 error
-	if a := ret.Get(1); a != nil {
-		ret1 = a.(error)
-	}
-	return ret0, ret1
 }
