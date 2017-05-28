@@ -12,6 +12,8 @@
 
 # Project-local glide cache, RE: https://github.com/Masterminds/glide/issues/736
 .glide/
-vendor/
+vendor/*
 
-**/actual/mockhiato_mocks.go
+# Mockhiato tests
+**/test/**/actual/**/mockhiato_mocks.go
+!**/test/**/vendor/

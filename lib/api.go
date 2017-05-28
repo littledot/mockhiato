@@ -9,9 +9,10 @@ import (
 
 // Config configures Mockhiato behavior.
 type Config struct {
-	Verbose      bool
-	ProjectPath  string
-	MockFileName string
+	Verbose            bool
+	ProjectPath        string
+	MockFileName       string
+	DependentMocksPath string
 }
 
 // Formatter formats mock files.
@@ -32,13 +33,17 @@ type Project struct {
 	PackagePath string
 	// VendorPath is the project's vedor path, which should be PackagePath/vendor
 	VendorPath string
+	// DependentMocksPath is where mocks for dependent interfaces (referenced but not defined by the project) will be created.
+	DependentMocksPath string
 
 	// Program is the loaded project
 	Program *loader.Program
 	// Packages is a list of packages with interfaces that can be mocked.
 	Packages []*Package
+	// DependentPackage contains dependent interfaces (referenced but not defined by the project) that can be mocked.
+	DependentPackage *GeneratedPackage
 
-	//GenPaths contains a list of generated file paths
+	// GenAbsPaths contains a list of generated file paths
 	GenAbsPaths []string
 }
 
@@ -53,6 +58,16 @@ type Package struct {
 	PackageInfo *loader.PackageInfo
 	// Context is the package of the project.
 	Context *types.Package
+	// Interfaces contains interface definitions found in the package.
+	Interfaces []*Interface
+}
+
+// GeneratedPackage contains metadata for a package that should be generated.
+type GeneratedPackage struct {
+	// ContextName is the name of the package that should be generated.
+	ContextName string
+	// ContextPath is the path of the package that should be generated.
+	ContextPath string
 	// Interfaces contains interface definitions found in the package.
 	Interfaces []*Interface
 }

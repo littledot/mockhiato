@@ -46,25 +46,34 @@ func (r *testifyFormatter) IsMockFile(file *os.File) bool {
 
 func (r *testifyFormatter) GenerateMocks(project *lib.Project) {
 	for _, pack := range project.Packages {
-		r.generateMock(project, pack)
+		r.generateMocksForDefinedInterfaces(project, pack)
 	}
+	r.generateMocksForDependentInterfaces(project, project.DependentPackage)
 }
 
-func (r *testifyFormatter) generateMock(project *lib.Project, pack *lib.Package) {
-	if len(pack.Interfaces) == 0 { // Nothing to mock? Return early
+func (r *testifyFormatter) generateMocksForDefinedInterfaces(project *lib.Project, pack *lib.Package) {
+	r.generateMock(project, pack.Context.Path(), pack.Context.Name(), pack.Interfaces)
+}
+
+func (r *testifyFormatter) generateMocksForDependentInterfaces(project *lib.Project, pack *lib.GeneratedPackage) {
+	r.generateMock(project, pack.ContextPath, pack.ContextName, pack.Interfaces)
+}
+
+func (r *testifyFormatter) generateMock(project *lib.Project, contextPath, contextName string, interfaces []*lib.Interface) {
+	if len(interfaces) == 0 {
 		return
 	}
-	log.Debugf("Generating mocks for %s", pack.Context.Path())
+	log.Debugf("Generating mocks for %s", contextPath)
 
 	buf := &bytes.Buffer{}
-	pf := lib.NewPackageFormatter(pack.Context)
+	pf := lib.NewPackageFormatter(contextPath)
 	pf.RecordDependency(types.NewPackage("github.com/stretchr/testify/mock", "mock"))
-	for _, iface := range pack.Interfaces {
+	for _, iface := range interfaces {
 		pf.IndexInterface(iface.TInterface)
 	}
 
 	// Write package
-	packageName := pack.Context.Name()
+	packageName := contextName
 	log.Debugf("Writing package: %s", packageName)
 	buf.WriteString(fmt.Sprintf("package %s\n", packageName))
 
@@ -82,7 +91,7 @@ func (r *testifyFormatter) generateMock(project *lib.Project, pack *lib.Package)
 	buf.WriteString(strings.Join(imports, "\n"))
 	buf.WriteString("\n)\n")
 
-	for _, iface := range pack.Interfaces {
+	for _, iface := range interfaces {
 		// Write struct
 		interfaceName := iface.TObject.Name()
 		mockName := interfaceName + "Mock"
@@ -141,8 +150,11 @@ func (r *testifyFormatter) generateMock(project *lib.Project, pack *lib.Package)
 		}
 	}
 
-	mockPath := filepath.Join(project.GoSrcAbsPath, pack.Context.Path(), r.config.MockFileName)
+	mockPath := filepath.Join(project.GoSrcAbsPath, contextPath, r.config.MockFileName)
 	log.Debugf("Creating file: %s", mockPath)
+	if err := os.MkdirAll(filepath.Dir(mockPath), 0755); err != nil {
+		panic(err)
+	}
 	mockFile, err := os.Create(mockPath)
 	if err != nil {
 		panic(err)
