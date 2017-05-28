@@ -84,6 +84,7 @@ func (r *Oracle) TypeCheckProject(project *lib.Project) {
 		pack.PackageInfo = allPackage
 		pack.Context = allPackage.Pkg
 		pack.Interfaces = interfaces
+		sort.Sort(byInterfaceName(interfaces))
 
 		project.Packages = append(project.Packages, pack)
 
@@ -109,6 +110,7 @@ func (r *Oracle) TypeCheckProject(project *lib.Project) {
 			}
 		}
 	}
+	sort.Sort(byInterfaceName(genPackage.Interfaces))
 
 	logTypeCheckProjectResults(project)
 }
@@ -131,7 +133,6 @@ func getInterfaces(objs map[*ast.Ident]types.Object) []*lib.Interface {
 		}
 		interfaces = append(interfaces, iface)
 	}
-	sort.Sort(byInterfaceName(interfaces))
 	return interfaces
 }
 
