@@ -7,29 +7,6 @@ import (
 	time "time"
 )
 
-// AddrMock implements mocks.Addr
-type AddrMock struct{ mock.Mock }
-
-// Network implements (mocks.Addr).Network
-func (r *AddrMock) Network() string {
-	ret := r.Called()
-	var ret0 string
-	if a := ret.Get(0); a != nil {
-		ret0 = a.(string)
-	}
-	return ret0
-}
-
-// String implements (mocks.Addr).String
-func (r *AddrMock) String() string {
-	ret := r.Called()
-	var ret0 string
-	if a := ret.Get(0); a != nil {
-		ret0 = a.(string)
-	}
-	return ret0
-}
-
 // ConnMock implements mocks.Conn
 type ConnMock struct{ mock.Mock }
 
@@ -119,17 +96,4 @@ func (r *ConnMock) Write(p0 []byte) (int, error) {
 		ret1 = a.(error)
 	}
 	return ret0, ret1
-}
-
-// errorMock implements mocks.error
-type errorMock struct{ mock.Mock }
-
-// Error implements (mocks.error).Error
-func (r *errorMock) Error() string {
-	ret := r.Called()
-	var ret0 string
-	if a := ret.Get(0); a != nil {
-		ret0 = a.(string)
-	}
-	return ret0
 }
