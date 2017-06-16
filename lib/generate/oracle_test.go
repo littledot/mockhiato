@@ -32,6 +32,7 @@ func TestGenerate(t *testing.T) {
 			config.ProjectPath = actualPath
 			config.MockFileName = "mockhiato_mocks.go"
 			config.DependentMocksPath = "mocks"
+			config.StructNameFormat = "{interface}Mock"
 
 			generate.Run(config)
 

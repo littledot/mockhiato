@@ -7,12 +7,13 @@ import (
 	"golang.org/x/tools/go/loader"
 )
 
-// Config configures Mockhiato behavior.
+// Config configures Mockhiato behavior. See mockhiato/cmd for documentation.
 type Config struct {
 	Verbose            bool
 	ProjectPath        string
 	MockFileName       string
 	DependentMocksPath string
+	StructNameFormat   string
 }
 
 // Formatter formats mock files.
