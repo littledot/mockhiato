@@ -2,7 +2,6 @@ package testify
 
 import (
 	"bufio"
-	"bytes"
 	"fmt"
 	"go/format"
 	"go/types"
@@ -66,7 +65,7 @@ func (r *testifyFormatter) generateMock(project *lib.Project, contextPath, conte
 	}
 	log.Debugf("Generating mocks for %s", contextPath)
 
-	buf := &bytes.Buffer{}
+	buf := &lib.Bufferw{}
 	pf := lib.NewPackageFormatter(contextPath)
 	pf.RecordDependency(types.NewPackage("github.com/stretchr/testify/mock", "mock"))
 	for _, iface := range interfaces {
@@ -160,16 +159,18 @@ func (r *testifyFormatter) generateMock(project *lib.Project, contextPath, conte
 	if err != nil {
 		panic(err)
 	}
-	defer mockFile.Close()
 
 	// Format generated code
 	sourceCode, err := format.Source(buf.Bytes())
 	if err != nil {
 		panic(err)
 	}
-
-	mockFile.Write(sourceCode)
-	mockFile.Close()
+	if _, err := mockFile.Write(sourceCode); err != nil {
+		panic(err)
+	}
+	if err := mockFile.Close(); err != nil {
+		panic(err)
+	}
 
 	project.GenAbsPaths = append(project.GenAbsPaths, mockPath)
 }
