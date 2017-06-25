@@ -21,7 +21,6 @@ matrix:
 before_install:
   - go get github.com/mattn/goveralls
 script:
-  - go test -v ./...
   - $HOME/gopath/bin/goveralls -service=travis-ci
 after_script:
   - ./cmd/go_report_card.sh
