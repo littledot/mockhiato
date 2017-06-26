@@ -5,16 +5,16 @@ import (
 	"strconv"
 )
 
-// PackageFormatter indexes packages and generates package aliases if required.
-type PackageFormatter struct {
+// PackageMapper indexes packages and generates package aliases if required.
+type PackageMapper struct {
 	ContextPath string
 	PathToAlias map[string]string
 	usedAliases map[string]int
 }
 
-// NewPackageFormatter creates a new PackageFormatter.
-func NewPackageFormatter(contextPath string) *PackageFormatter {
-	return &PackageFormatter{
+// NewPackageMapper creates a new PackageMapper.
+func NewPackageMapper(contextPath string) *PackageMapper {
+	return &PackageMapper{
 		contextPath,
 		map[string]string{},
 		map[string]int{},
@@ -22,32 +22,32 @@ func NewPackageFormatter(contextPath string) *PackageFormatter {
 }
 
 // IndexImports indexes tPackage's dependencies.
-func (r *PackageFormatter) IndexImports(tPackage *types.Package) {
+func (r *PackageMapper) IndexImports(tPackage *types.Package) {
 	for _, tImport := range tPackage.Imports() {
 		r.RecordDependency(tImport)
 	}
 }
 
 // IndexInterface indexes tInterface's dependencies.
-func (r *PackageFormatter) IndexInterface(tInterface *types.Interface) {
+func (r *PackageMapper) IndexInterface(tInterface *types.Interface) {
 	for i := 0; i < tInterface.NumMethods(); i++ {
 		r.IndexFunc(tInterface.Method(i))
 	}
 }
 
 // IndexFunc indexes tFunc's dependencies.
-func (r *PackageFormatter) IndexFunc(tFunc *types.Func) {
+func (r *PackageMapper) IndexFunc(tFunc *types.Func) {
 	r.IndexSignature(tFunc.Type().(*types.Signature))
 }
 
 // IndexSignature indexes tSignature's dependencies.
-func (r *PackageFormatter) IndexSignature(tSignature *types.Signature) {
+func (r *PackageMapper) IndexSignature(tSignature *types.Signature) {
 	r.IndexTuple(tSignature.Params())
 	r.IndexTuple(tSignature.Results())
 }
 
 // IndexTuple indexes tTuple's dependencies
-func (r *PackageFormatter) IndexTuple(tTuple *types.Tuple) {
+func (r *PackageMapper) IndexTuple(tTuple *types.Tuple) {
 	for i := 0; i < tTuple.Len(); i++ {
 		tVar := tTuple.At(i)
 		types.ObjectString(tVar, r.RecordDependency)
@@ -55,7 +55,7 @@ func (r *PackageFormatter) IndexTuple(tTuple *types.Tuple) {
 }
 
 // RecordDependency indexes tPackage as a dependency and returns its name.
-func (r *PackageFormatter) RecordDependency(tPackage *types.Package) string {
+func (r *PackageMapper) RecordDependency(tPackage *types.Package) string {
 	if tPackage.Path() == r.ContextPath {
 		return ""
 	}
@@ -79,11 +79,11 @@ func (r *PackageFormatter) RecordDependency(tPackage *types.Package) string {
 }
 
 // ObjectTypeString returns the string representation of tObject's type.
-func (r *PackageFormatter) ObjectTypeString(tObject types.Object) string {
+func (r *PackageMapper) ObjectTypeString(tObject types.Object) string {
 	return r.TypeString(tObject.Type())
 }
 
 // TypeString returns the string representation of tType.
-func (r *PackageFormatter) TypeString(tType types.Type) string {
+func (r *PackageMapper) TypeString(tType types.Type) string {
 	return types.TypeString(tType, r.RecordDependency)
 }

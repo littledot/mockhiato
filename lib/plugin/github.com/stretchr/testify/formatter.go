@@ -66,10 +66,10 @@ func (r *testifyFormatter) generateMock(project *lib.Project, contextPath, conte
 	log.Debugf("Generating mocks for %s", contextPath)
 
 	buf := &lib.Bufferw{}
-	pf := lib.NewPackageFormatter(contextPath)
-	pf.RecordDependency(types.NewPackage("github.com/stretchr/testify/mock", "mock"))
+	pm := lib.NewPackageMapper(contextPath)
+	pm.RecordDependency(types.NewPackage("github.com/stretchr/testify/mock", "mock"))
 	for _, iface := range interfaces {
-		pf.IndexInterface(iface.TInterface)
+		pm.IndexInterface(iface.TInterface)
 	}
 
 	// Write package
@@ -83,7 +83,7 @@ func (r *testifyFormatter) generateMock(project *lib.Project, contextPath, conte
 
 	// Write imports
 	imports := []string{}
-	for depPath, depAlias := range pf.PathToAlias {
+	for depPath, depAlias := range pm.PathToAlias {
 		imports = append(imports, fmt.Sprintf(`%s "%s"`, depAlias, strings.TrimPrefix(depPath, project.VendorPath+"/")))
 	}
 	log.Debugf("Writing imports: %s", strings.Join(imports, ", "))
@@ -110,7 +110,7 @@ func (r *testifyFormatter) generateMock(project *lib.Project, contextPath, conte
 				param := signature.Params().At(j)
 				varName := "p" + strconv.Itoa(j)
 				paramNames = append(paramNames, varName)
-				paramExprs = append(paramExprs, varName+" "+pf.ObjectTypeString(param))
+				paramExprs = append(paramExprs, varName+" "+pm.ObjectTypeString(param))
 			}
 
 			if signature.Variadic() { // Variadic method? Replace last parameter's [] with ... ("p1 []int" -> "p1 ...int")
@@ -123,7 +123,7 @@ func (r *testifyFormatter) generateMock(project *lib.Project, contextPath, conte
 			verifyReturnLines := []string{}
 			for j := 0; j < signature.Results().Len(); j++ {
 				result := signature.Results().At(j)
-				resultTypeString := pf.ObjectTypeString(result)
+				resultTypeString := pm.ObjectTypeString(result)
 				varName := "ret" + strconv.Itoa(j)
 				returnNames = append(returnNames, varName)
 				returnTypes = append(returnTypes, resultTypeString)
