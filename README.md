@@ -7,12 +7,12 @@
 Mockhiato is a mock generation CLI tool for the Go programming language. It is designed to be fast and configurable.
 
 
-- [x] Mockhiato generates mocks for entire packages recursively with a single command.
-- [x] Mockhiato generates mocks for 3rd party interfaces used by your packages. (eg: If your code uses `os.FileInfo`, Mockhiato will generate mocks for it even though it is not part of your package.)
-- [x] Mockhiato uses `go/loader` to speed up AST parsing.
-- [x] Mockhiato is highly configurable to suit your organization's coding standards. (eg: mock name format, directory name, etc.)
-- [x] Mockhiato provides easy-to-use and well-documented command line interface.
-- [x] Mockhiato supports `stretchr/testify`.
+&nbsp;&nbsp;&nbsp;&nbsp;🌀 Generates mocks for entire packages recursively with a single command.
+&nbsp;&nbsp;&nbsp;&nbsp;🔎 Generates mocks for 3rd party interfaces used by your packages. (eg: If your code uses `os.FileInfo`, Mockhiato will generate mocks for it even though it is not part of your package.)
+&nbsp;&nbsp;&nbsp;&nbsp;⚡ Uses `go/loader` to speed up AST parsing.
+&nbsp;&nbsp;&nbsp;&nbsp;🛠️ Highly configurable to suit your organization's coding standards. (eg: mock name format, directory name, etc.)
+&nbsp;&nbsp;&nbsp;&nbsp;👶 Provides easy-to-use and well-documented command line interface.
+&nbsp;&nbsp;&nbsp;&nbsp;🌈 Supports `stretchr/testify`.
 
 ![asciicast](https://cloud.githubusercontent.com/assets/14984066/25729923/7cd45c64-30ed-11e7-8e29-9145085e4748.gif)
 
