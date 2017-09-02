@@ -205,6 +205,12 @@ func (r *TargetMock) Uint(p0 uint, p1 uint8, p2 uint16, p3 uint32, p4 uint64) (u
 	return ret0, ret1, ret2, ret3, ret4
 }
 
+// VariadicSlice implements (example.Target).VariadicSlice
+func (r *TargetMock) VariadicSlice(p0 ...[][][]string) {
+	r.Called(p0)
+	return
+}
+
 // World implements (example.Target).World
 func (r *TargetMock) World(p0 int, p1 ...string) map[int]interface{} {
 	ret := r.Called(p0, p1)
