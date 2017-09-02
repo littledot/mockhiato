@@ -24,6 +24,9 @@ type Target interface {
 	// Param names should be ignored
 	Hello(a string) (b int, err bool)
 	World(c int, a ...string) (b map[int]interface{})
+
+	// Other edge cases
+	VariadicSlice(...[][][]string)
 }
 
 // B is an interface that should be mocked

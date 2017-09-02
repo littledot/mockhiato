@@ -115,7 +115,7 @@ func (r *testifyFormatter) generateMock(project *lib.Project, contextPath, conte
 
 			if signature.Variadic() { // Variadic method? Replace last parameter's [] with ... ("p1 []int" -> "p1 ...int")
 				pos := signature.Params().Len() - 1
-				paramExprs[pos] = strings.Replace(paramExprs[pos], "[]", "...", -1)
+				paramExprs[pos] = strings.Replace(paramExprs[pos], "[]", "...", 1)
 			}
 
 			returnNames := []string{}
