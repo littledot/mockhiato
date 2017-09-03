@@ -92,9 +92,15 @@ func (r *testifyFormatter) generateMock(project *lib.Project, contextPath, conte
 	buf.WriteString("\n)\n")
 
 	for _, iface := range interfaces {
-		// Write struct
+
 		interfaceName := iface.TObject.Name()
 		mockName := strings.Replace(r.config.StructNameFormat, interfaceNameToken, interfaceName, -1)
+
+		// Write constructor
+		buf.WriteString(fmt.Sprintf("// New%s creates a new %s\n", mockName, mockName))
+		buf.WriteString(fmt.Sprintf("func New%s() *%s {return &%s{}}\n", mockName, mockName, mockName))
+
+		// Write struct
 		log.Debugf("Writing struct: %s", mockName)
 		buf.WriteString(fmt.Sprintf("// %s implements %s.%s\n", mockName, packageName, interfaceName))
 		buf.WriteString(fmt.Sprintf("type %s struct { mock.Mock }\n", mockName))

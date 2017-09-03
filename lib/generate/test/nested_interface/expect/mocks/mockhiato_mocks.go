@@ -7,6 +7,9 @@ import (
 	time "time"
 )
 
+// NewConnMock creates a new ConnMock
+func NewConnMock() *ConnMock { return &ConnMock{} }
+
 // ConnMock implements mocks.Conn
 type ConnMock struct{ mock.Mock }
 

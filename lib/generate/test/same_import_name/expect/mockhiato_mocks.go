@@ -7,6 +7,9 @@ import (
 	mock "github.com/stretchr/testify/mock"
 )
 
+// NewTargetMock creates a new TargetMock
+func NewTargetMock() *TargetMock { return &TargetMock{} }
+
 // TargetMock implements example.Target
 type TargetMock struct{ mock.Mock }
 
