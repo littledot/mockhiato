@@ -8,6 +8,9 @@ import (
 	time "time"
 )
 
+// NewFileInfoMock creates a new FileInfoMock
+func NewFileInfoMock() *FileInfoMock { return &FileInfoMock{} }
+
 // FileInfoMock implements mocks.FileInfo
 type FileInfoMock struct{ mock.Mock }
 
@@ -71,6 +74,9 @@ func (r *FileInfoMock) Sys() interface{} {
 	return ret0
 }
 
+// NewVendorDepMock creates a new VendorDepMock
+func NewVendorDepMock() *VendorDepMock { return &VendorDepMock{} }
+
 // VendorDepMock implements mocks.VendorDep
 type VendorDepMock struct{ mock.Mock }
 
@@ -79,6 +85,9 @@ func (r *VendorDepMock) Vending(p0 bigdot.VendorStruct) {
 	r.Called(p0)
 	return
 }
+
+// NewerrorMock creates a new errorMock
+func NewerrorMock() *errorMock { return &errorMock{} }
 
 // errorMock implements mocks.error
 type errorMock struct{ mock.Mock }

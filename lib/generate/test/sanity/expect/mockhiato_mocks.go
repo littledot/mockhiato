@@ -7,6 +7,9 @@ import (
 	mock "github.com/stretchr/testify/mock"
 )
 
+// NewBMock creates a new BMock
+func NewBMock() *BMock { return &BMock{} }
+
 // BMock implements example.B
 type BMock struct{ mock.Mock }
 
@@ -19,6 +22,9 @@ func (r *BMock) No(p0 *json.Decoder) *bytes.Buffer {
 	}
 	return ret0
 }
+
+// NewTargetMock creates a new TargetMock
+func NewTargetMock() *TargetMock { return &TargetMock{} }
 
 // TargetMock implements example.Target
 type TargetMock struct{ mock.Mock }
