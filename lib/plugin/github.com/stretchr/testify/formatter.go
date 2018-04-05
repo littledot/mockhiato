@@ -156,18 +156,20 @@ func (r *testifyFormatter) generateMock(project *lib.Project, contextPath, conte
 		}
 	}
 
+	// Format generated code
+	sourceCode, err := format.Source(buf.Bytes())
+	if err != nil {
+		log.Debugf("Format code: %s", buf.Bytes())
+		panic(err)
+	}
+
+	// Flush code to disk
 	mockPath := filepath.Join(project.GoSrcAbsPath, contextPath, r.config.MockFileName)
 	log.Debugf("Creating file: %s", mockPath)
 	if err := os.MkdirAll(filepath.Dir(mockPath), 0755); err != nil {
 		panic(err)
 	}
 	mockFile, err := os.Create(mockPath)
-	if err != nil {
-		panic(err)
-	}
-
-	// Format generated code
-	sourceCode, err := format.Source(buf.Bytes())
 	if err != nil {
 		panic(err)
 	}
