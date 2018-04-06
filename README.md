@@ -1,5 +1,7 @@
 # Mockhiato
 
+[![License](https://img.shields.io/github/license/littledot/mockhiato.svg)](https://github.com/littledot/mockhiato/blob/master/LICENSE)
+[![GitHub Release](https://img.shields.io/github/release/littledot/mockhiato.svg)](https://github.com/littledot/mockhiato/releases)
 [![Build Status](https://travis-ci.org/littledot/mockhiato.svg?branch=master)](https://travis-ci.org/littledot/mockhiato)
 [![Go Report Card](https://goreportcard.com/badge/github.com/littledot/mockhiato)](https://goreportcard.com/report/github.com/littledot/mockhiato)
 [![Coverage Status](https://codecov.io/gh/littledot/mockhiato/branch/master/graph/badge.svg)](https://codecov.io/gh/littledot/mockhiato)
