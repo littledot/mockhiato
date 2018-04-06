@@ -7,23 +7,23 @@ import (
 
 // PackageMapper indexes packages and generates package aliases if required.
 type PackageMapper struct {
-	ContextPath string
+	PkgPath     string
 	PathToAlias map[string]string
 	usedAliases map[string]int
 }
 
 // NewPackageMapper creates a new PackageMapper.
-func NewPackageMapper(contextPath string) *PackageMapper {
+func NewPackageMapper(PkgPath string) *PackageMapper {
 	return &PackageMapper{
-		contextPath,
+		PkgPath,
 		map[string]string{},
 		map[string]int{},
 	}
 }
 
-// IndexImports indexes tPackage's dependencies.
-func (r *PackageMapper) IndexImports(tPackage *types.Package) {
-	for _, tImport := range tPackage.Imports() {
+// IndexImports indexes tPkg's dependencies.
+func (r *PackageMapper) IndexImports(tPkg *types.Package) {
+	for _, tImport := range tPkg.Imports() {
 		r.RecordDependency(tImport)
 	}
 }
@@ -54,22 +54,22 @@ func (r *PackageMapper) IndexTuple(tTuple *types.Tuple) {
 	}
 }
 
-// RecordDependency indexes tPackage as a dependency and returns its name.
-func (r *PackageMapper) RecordDependency(tPackage *types.Package) string {
-	if tPackage.Path() == r.ContextPath {
+// RecordDependency indexes tPkg as a dependency and returns its name.
+func (r *PackageMapper) RecordDependency(tPkg *types.Package) string {
+	if tPkg.Path() == r.PkgPath {
 		return ""
 	}
 
-	if alias, exists := r.PathToAlias[tPackage.Path()]; exists {
+	if alias, exists := r.PathToAlias[tPkg.Path()]; exists {
 		return alias
 	}
 
-	name := tPackage.Name()
+	name := tPkg.Name()
 	alias := name
 	for i := 1; ; i++ {
 		if _, exists := r.usedAliases[alias]; !exists {
 			r.usedAliases[alias] = 1
-			r.PathToAlias[tPackage.Path()] = alias
+			r.PathToAlias[tPkg.Path()] = alias
 			break
 		}
 		alias = name + strconv.Itoa(i)

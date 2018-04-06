@@ -65,28 +65,28 @@ func (r *Oracle) TypeCheckProject(project *lib.Project) {
 	}
 
 	// Find interfaces defined by project
-	for _, allPackage := range program.AllPackages {
-		packagePath := allPackage.Pkg.Path()
-		if lib.IsExternalDependency(project, packagePath) { // External dependency? Skip
+	for _, pkgInfo := range program.AllPackages {
+		pkgPath := pkgInfo.Pkg.Path()
+		if lib.IsExternalDependency(project, pkgPath) { // External dependency? Skip
 			continue
 		}
 
-		defInterfaces := getInterfaces(allPackage.Info.Defs)
+		defInterfaces := getInterfaces(pkgInfo.Info.Defs)
 		num := len(defInterfaces)
 		if num == 0 { // 0 interfaces defined? Skip
-			log.Debugf("Ignore package %s because it has 0 interfaces", packagePath)
+			log.Debugf("Ignore package %s because it has 0 interfaces", pkgPath)
 			continue
 		}
-		log.Debugf("Check %d interface(s) defined in %s", num, packagePath)
+		log.Debugf("Check %d interface(s) defined in %s", num, pkgPath)
 		r.recordInterfaces(project, defInterfaces)
 
-		useInterfaces := getInterfaces(allPackage.Info.Uses)
-		log.Debugf("Check %d interface(s) used in %s", len(useInterfaces), packagePath)
+		useInterfaces := getInterfaces(pkgInfo.Info.Uses)
+		log.Debugf("Check %d interface(s) used in %s", len(useInterfaces), pkgPath)
 		r.recordInterfaces(project, useInterfaces)
 	}
 
-	for _, pack := range project.Packages {
-		sort.Sort(byInterfaceName(pack.Interfaces))
+	for _, pkg := range project.Packages {
+		sort.Sort(byInterfaceName(pkg.Interfaces))
 	}
 
 	logTypeCheckProjectResults(project)
@@ -99,17 +99,15 @@ func (r *Oracle) recordInterfaces(project *lib.Project, interfaces []*lib.Interf
 			continue
 		}
 
-		context := iface.TObject.Pkg()
-		depPackage := project.Packages[context]
-		if depPackage == nil {
-			depPackage = &lib.Package{}
-			depPackage.Context = context
-			depPackage.Interfaces = []*lib.Interface{}
-			project.Packages[context] = depPackage
-			log.Debugf("Record package: %s (%s)", context.Name(), context.Path())
+		tPkg := iface.TObject.Pkg()
+		pkg := project.Packages[tPkg]
+		if pkg == nil {
+			pkg = lib.NewPackage(tPkg)
+			project.Packages[tPkg] = pkg
+			log.Debugf("Record package: %s (%s)", tPkg.Name(), tPkg.Path())
 
 		}
-		depPackage.Interfaces = append(depPackage.Interfaces, iface)
+		pkg.Interfaces = append(pkg.Interfaces, iface)
 		log.Debugf("Record interface: %s", iface.TObject.Name())
 
 		r.allMockedInterfaces[iface.TObject] = iface
@@ -158,12 +156,6 @@ func filterInterfaces(objs map[*ast.Ident]types.Object) map[*ast.Ident]types.Obj
 	return interfaces
 }
 
-type byInterfaceName []*lib.Interface
-
-func (r byInterfaceName) Len() int           { return len(r) }
-func (r byInterfaceName) Swap(i, j int)      { r[i], r[j] = r[j], r[i] }
-func (r byInterfaceName) Less(i, j int) bool { return r[i].TObject.Name() < r[j].TObject.Name() }
-
 func logScanProjectResults(project *lib.Project) {
 	log.Infof("Scan project complete")
 	log.Infof("Project path is %s", project.ProjectAbsPath)
@@ -176,7 +168,7 @@ func logScanProjectResults(project *lib.Project) {
 func logTypeCheckProjectResults(project *lib.Project) {
 	log.Infof("Type check complete")
 	for _, dep := range project.Packages {
-		log.Infof("Type checker found %d interface(s) in %s:", len(dep.Interfaces), dep.Context.Path())
+		log.Infof("Type checker found %d interface(s) in %s:", len(dep.Interfaces), dep.TPackage.Path())
 		for _, iface := range dep.Interfaces {
 			log.Infof("\t%s", iface.TObject.Name())
 		}

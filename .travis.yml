@@ -25,10 +25,15 @@ matrix:
   allow_failures:
     - go: master
 
+branches:
+  only: 
+    - master # Stop push builds on PRs https://stackoverflow.com/a/31882307/499125
+
 script:
   - ./cmd/cover_multiple_packages.sh
 after_success:
   - bash <(curl -s https://codecov.io/bash)
+after_script:
   - ./cmd/go_report_card.sh
 
 notifications:
