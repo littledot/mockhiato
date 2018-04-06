@@ -18,11 +18,10 @@ matrix:
   allow_failures:
   - go: master
 
-before_install:
-  - go get github.com/mattn/goveralls
 script:
-  - $HOME/gopath/bin/goveralls -service=travis-ci
-after_script:
+  - go test -v ./... -coverprofile=coverage.txt -covermode=atomic
+after_success:
+  - bash <(curl -s https://codecov.io/bash)
   - ./cmd/go_report_card.sh
 
 notifications:
