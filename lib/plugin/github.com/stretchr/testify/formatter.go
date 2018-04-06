@@ -46,39 +46,39 @@ func (r *testifyFormatter) GenerateMocks(project *lib.Project) {
 }
 
 func (r *testifyFormatter) generateMocksForPackage(project *lib.Project, pack *lib.Package) {
-	mockPackage := r.mockPackage(project, pack.Context)
-	r.generateMock(project, mockPackage.Path(), mockPackage.Name(), pack.Interfaces)
+	mockPkg := r.mockPackage(project, pack.TPackage)
+	r.generateMock(project, mockPkg, pack.Interfaces)
 }
 
-func (r *testifyFormatter) mockPackage(project *lib.Project, context *types.Package) *types.Package {
+func (r *testifyFormatter) mockPackage(project *lib.Project, srcPkg *types.Package) *types.Package {
 	// Internal package? Put mocks directly in original package
-	contextName := context.Name()
-	contextPath := context.Path()
-	if lib.IsExternalDependency(project, contextPath) { // External package? Put mocks under dependent mocks path
-		contextName = strings.Replace(r.config.DependentPackageNameFormat, lib.PackageNameToken, contextName, -1)
-		contextPath = strings.TrimPrefix(contextPath, project.VendorPath)
-		contextPath = filepath.Join(project.DependentMocksPath, contextPath, contextName)
+	pkgName := srcPkg.Name()
+	pkgPath := srcPkg.Path()
+	if lib.IsExternalDependency(project, pkgPath) { // External package? Put mocks under dependent mocks path
+		pkgName = strings.Replace(r.config.DependentPackageNameFormat, lib.PackageNameToken, pkgName, -1)
+		pkgPath = strings.TrimPrefix(pkgPath, project.VendorPath)
+		pkgPath = filepath.Join(project.DependentMocksPath, pkgPath, pkgName)
 	}
-	return types.NewPackage(contextPath, contextName)
+	return types.NewPackage(pkgPath, pkgName)
 }
 
-func (r *testifyFormatter) generateMock(project *lib.Project, contextPath, contextName string, interfaces []*lib.Interface) {
+func (r *testifyFormatter) generateMock(project *lib.Project, pkg *types.Package, interfaces []*lib.Interface) {
 	if len(interfaces) == 0 {
 		return
 	}
-	log.Debugf("Generating mocks for %s", contextPath)
+	log.Debugf("Generating mocks for %s", pkg.Path())
 
 	buf := &lib.Bufferw{}
-	pm := lib.NewPackageMapper(contextPath)
+	pm := lib.NewPackageMapper(pkg.Path())
 	pm.RecordDependency(types.NewPackage("github.com/stretchr/testify/mock", "mock"))
 	for _, iface := range interfaces {
 		pm.IndexInterface(iface.TInterface)
 	}
 
 	// Write package
-	packageName := contextName
-	log.Debugf("Writing package: %s", packageName)
-	buf.WriteString(fmt.Sprintf("package %s\n", packageName))
+	pkgName := pkg.Name()
+	log.Debugf("Writing package: %s", pkgName)
+	buf.WriteString(fmt.Sprintf("package %s\n", pkgName))
 
 	// Write magic string
 	log.Debugf("Writing magic: %s", lib.Magic)
@@ -105,7 +105,7 @@ func (r *testifyFormatter) generateMock(project *lib.Project, contextPath, conte
 
 		// Write struct
 		log.Debugf("Writing struct: %s", mockName)
-		buf.WriteString(fmt.Sprintf("// %s implements %s.%s\n", mockName, packageName, interfaceName))
+		buf.WriteString(fmt.Sprintf("// %s implements %s.%s\n", mockName, pkgName, interfaceName))
 		buf.WriteString(fmt.Sprintf("type %s struct { mock.Mock }\n", mockName))
 
 		for i := 0; i < iface.TInterface.NumMethods(); i++ {
@@ -141,7 +141,7 @@ func (r *testifyFormatter) generateMock(project *lib.Project, contextPath, conte
 			}
 
 			log.Debugf("Writing method: %s()", method.Name())
-			commentLine := fmt.Sprintf("// %s implements (%s.%s).%s\n", method.Name(), packageName, interfaceName, method.Name())
+			commentLine := fmt.Sprintf("// %s implements (%s.%s).%s\n", method.Name(), pkgName, interfaceName, method.Name())
 			signatureLine := fmt.Sprintf("func (r *%s) %s(%s) (%s) {\n", mockName, method.Name(), strings.Join(paramExprs, ", "), strings.Join(returnTypes, ","))
 			verifyInvokedLine := fmt.Sprintf("r.Called(%s)\n", strings.Join(paramNames, ", "))
 			if signature.Results().Len() > 0 {
@@ -167,7 +167,7 @@ func (r *testifyFormatter) generateMock(project *lib.Project, contextPath, conte
 	}
 
 	// Flush code to disk
-	mockPath := filepath.Join(project.GoSrcAbsPath, contextPath, r.config.MockFileName)
+	mockPath := filepath.Join(project.GoSrcAbsPath, pkg.Path(), r.config.MockFileName)
 	log.Debugf("Creating file: %s", mockPath)
 	if err := os.MkdirAll(filepath.Dir(mockPath), 0755); err != nil {
 		panic(err)

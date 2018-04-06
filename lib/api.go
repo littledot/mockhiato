@@ -44,10 +44,15 @@ func NewProject() *Project {
 
 // Package contains metadata for a package discovered in the project tree. Formatters rely on this to generate mocks.
 type Package struct {
-	// Context is the package that contains interfaces.
-	Context *types.Package
+	// Package is the package that contains interfaces.
+	TPackage *types.Package
 	// Interfaces contains interface definitions found in the package.
 	Interfaces []*Interface
+}
+
+// NewPackage constructor
+func NewPackage(p *types.Package) *Package {
+	return &Package{p, []*Interface{}}
 }
 
 // Interface contains metadata for an interface definition. Formatters rely on this to generate mocks.
