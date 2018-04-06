@@ -1,6 +1,8 @@
 package lib
 
 import (
+	"strings"
+
 	"github.com/go-errors/errors"
 	log "github.com/sirupsen/logrus"
 )
@@ -23,4 +25,12 @@ func Err(value interface{}) *errors.Error {
 	default:
 		return errors.Wrap(rec, 1)
 	}
+}
+
+// IsExternalDependency returns true when `packagePath` is not a project package.
+func IsExternalDependency(project *Project, packagePath string) bool {
+	if strings.HasPrefix(packagePath, project.VendorPath) || !strings.HasPrefix(packagePath, project.PackagePath) {
+		return true
+	}
+	return false
 }

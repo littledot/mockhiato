@@ -67,52 +67,53 @@ func (r *Oracle) TypeCheckProject(project *lib.Project) {
 	// Find interfaces defined by project
 	for _, allPackage := range program.AllPackages {
 		packagePath := allPackage.Pkg.Path()
-		if !strings.HasPrefix(packagePath, project.PackagePath) { // External dependency? Skip
+		if lib.IsExternalDependency(project, packagePath) { // External dependency? Skip
 			continue
 		}
-		if strings.HasPrefix(packagePath, project.VendorPath) { // Vendor dependency? Skip
-			continue
-		}
-		interfaces := getInterfaces(allPackage.Info.Defs)
-		num := len(interfaces)
+
+		defInterfaces := getInterfaces(allPackage.Info.Defs)
+		num := len(defInterfaces)
 		if num == 0 { // 0 interfaces defined? Skip
 			log.Debugf("Ignore package %s because it has 0 interfaces", packagePath)
 			continue
 		}
+		log.Debugf("Check %d interface(s) defined in %s", num, packagePath)
+		r.recordInterfaces(project, defInterfaces)
 
-		pack := &lib.Package{}
-		pack.PackageInfo = allPackage
-		pack.Context = allPackage.Pkg
-		pack.Interfaces = interfaces
-		sort.Sort(byInterfaceName(interfaces))
-
-		project.Packages = append(project.Packages, pack)
-
-		for _, iface := range interfaces {
-			r.allMockedInterfaces[iface.TObject] = iface
-		}
-		log.Debugf("Found package %s with %d interfaces", packagePath, num)
+		useInterfaces := getInterfaces(allPackage.Info.Uses)
+		log.Debugf("Check %d interface(s) used in %s", len(useInterfaces), packagePath)
+		r.recordInterfaces(project, useInterfaces)
 	}
 
-	// Find interfaces used by project
-	genPackage := &lib.GeneratedPackage{}
-	genPackage.ContextPath = project.DependentMocksPath
-	genPackage.ContextName = filepath.Base(genPackage.ContextPath)
-	genPackage.Interfaces = []*lib.Interface{}
-	project.DependentPackage = genPackage
-
-	for _, pack := range project.Packages { // Only need to inspect packages that needs to be mocked
-		interfaces := getInterfaces(pack.PackageInfo.Uses)
-		for _, iface := range interfaces {
-			if _, exists := r.allMockedInterfaces[iface.TObject]; !exists { // Interface not mocked before? Mock it
-				genPackage.Interfaces = append(genPackage.Interfaces, iface)
-				r.allMockedInterfaces[iface.TObject] = iface
-			}
-		}
+	for _, pack := range project.Packages {
+		sort.Sort(byInterfaceName(pack.Interfaces))
 	}
-	sort.Sort(byInterfaceName(genPackage.Interfaces))
 
 	logTypeCheckProjectResults(project)
+}
+
+func (r *Oracle) recordInterfaces(project *lib.Project, interfaces []*lib.Interface) {
+	for _, iface := range interfaces {
+		if _, exists := r.allMockedInterfaces[iface.TObject]; exists { // Interface already indexed? Skip
+			log.Debugf("Ignore interface %s because it is already indexed", iface.TObject.Name())
+			continue
+		}
+
+		context := iface.TObject.Pkg()
+		depPackage := project.Packages[context]
+		if depPackage == nil {
+			depPackage = &lib.Package{}
+			depPackage.Context = context
+			depPackage.Interfaces = []*lib.Interface{}
+			project.Packages[context] = depPackage
+			log.Debugf("Record package: %s (%s)", context.Name(), context.Path())
+
+		}
+		depPackage.Interfaces = append(depPackage.Interfaces, iface)
+		log.Debugf("Record interface: %s", iface.TObject.Name())
+
+		r.allMockedInterfaces[iface.TObject] = iface
+	}
 }
 
 // GenerateMocks generate mocks for the project
@@ -143,6 +144,9 @@ func filterInterfaces(objs map[*ast.Ident]types.Object) map[*ast.Ident]types.Obj
 		if obj == nil {
 			continue
 		}
+		if obj.Pkg() == nil {
+			continue
+		}
 		if _, ok := obj.(*types.TypeName); !ok {
 			continue
 		}
@@ -171,25 +175,12 @@ func logScanProjectResults(project *lib.Project) {
 
 func logTypeCheckProjectResults(project *lib.Project) {
 	log.Infof("Type check complete")
-
-	// Report stats for interfaces defined by project
-	for _, pack := range project.Packages {
-		ifaces := []string{}
-		for _, iface := range pack.Interfaces {
-			ifaces = append(ifaces, iface.TObject.Name())
+	for _, dep := range project.Packages {
+		log.Infof("Type checker found %d interface(s) in %s:", len(dep.Interfaces), dep.Context.Path())
+		for _, iface := range dep.Interfaces {
+			log.Infof("\t%s", iface.TObject.Name())
 		}
-		log.Infof("Type checker found %d interface(s) defined in package %s: %s",
-			len(ifaces), pack.Context.Path(), strings.Join(ifaces, ", "))
 	}
-
-	// Report stats for interfaces used by project
-	dep := project.DependentPackage
-	ifaces := []string{}
-	for _, iface := range dep.Interfaces {
-		ifaces = append(ifaces, iface.TObject.Name())
-	}
-	log.Infof("Type checker found %d interface(s) used by project: %s",
-		len(dep.Interfaces), strings.Join(ifaces, ", "))
 }
 
 func logGenerateMocksResults(project *lib.Project) {

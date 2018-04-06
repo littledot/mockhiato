@@ -27,4 +27,6 @@ func init() {
 		"Configures where mocks for dependent interfaces (referenced but not defined by the project) will be created.")
 	generateCmd.Flags().StringP("StructNameFormat", "s", "{interface}Mock",
 		"Configures the name format for generated structs. Use {interface} as a placeholder for the name of the interface being mocked. For example, '{interface}Mock' means suffixing generated structs with 'Mock' (XMock, YMock, PipeReaderMock).")
+	generateCmd.Flags().StringP("DependentPackageNameFormat", "f", "m{package}",
+		"Configures the name format for generated dependent package names. Use {package} as a placeholder for the name of the package being generated. For example, 'm{package}' means prefixing generated package names with 'm' (mio, mbytes, mhttp).")
 }

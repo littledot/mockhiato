@@ -30,10 +30,8 @@ type Project struct {
 
 	// Program is the loaded project
 	Program *loader.Program
-	// Packages is a list of packages with interfaces that can be mocked.
-	Packages []*Package
-	// DependentPackage contains dependent interfaces (referenced but not defined by the project) that can be mocked.
-	DependentPackage *GeneratedPackage
+	// Packages is a map of packages with interfaces that needs to be mocked.
+	Packages map[*types.Package]*Package
 
 	// GenAbsPaths contains a list of generated file paths
 	GenAbsPaths []string
@@ -41,25 +39,13 @@ type Project struct {
 
 // NewProject creates a new Project.
 func NewProject() *Project {
-	return &Project{}
+	return &Project{Packages: map[*types.Package]*Package{}}
 }
 
 // Package contains metadata for a package discovered in the project tree. Formatters rely on this to generate mocks.
 type Package struct {
-	// PackageInfo is the loader's package info
-	PackageInfo *loader.PackageInfo
-	// Context is the package of the project.
+	// Context is the package that contains interfaces.
 	Context *types.Package
-	// Interfaces contains interface definitions found in the package.
-	Interfaces []*Interface
-}
-
-// GeneratedPackage contains metadata for a package that should be generated.
-type GeneratedPackage struct {
-	// ContextName is the name of the package that should be generated.
-	ContextName string
-	// ContextPath is the path of the package that should be generated.
-	ContextPath string
 	// Interfaces contains interface definitions found in the package.
 	Interfaces []*Interface
 }
