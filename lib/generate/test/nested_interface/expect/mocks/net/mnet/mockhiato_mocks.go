@@ -7,32 +7,6 @@ import (
 	time "time"
 )
 
-// NewAddrMock creates a new AddrMock
-func NewAddrMock() *AddrMock { return &AddrMock{} }
-
-// AddrMock implements mnet.Addr
-type AddrMock struct{ mock.Mock }
-
-// Network implements (mnet.Addr).Network
-func (r *AddrMock) Network() string {
-	ret := r.Called()
-	var ret0 string
-	if a := ret.Get(0); a != nil {
-		ret0 = a.(string)
-	}
-	return ret0
-}
-
-// String implements (mnet.Addr).String
-func (r *AddrMock) String() string {
-	ret := r.Called()
-	var ret0 string
-	if a := ret.Get(0); a != nil {
-		ret0 = a.(string)
-	}
-	return ret0
-}
-
 // NewConnMock creates a new ConnMock
 func NewConnMock() *ConnMock { return &ConnMock{} }
 
