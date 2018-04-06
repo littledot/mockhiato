@@ -2,6 +2,7 @@
 
 [![Build Status](https://travis-ci.org/littledot/mockhiato.svg?branch=master)](https://travis-ci.org/littledot/mockhiato)
 [![Go Report Card](https://goreportcard.com/badge/github.com/littledot/mockhiato)](https://goreportcard.com/report/github.com/littledot/mockhiato)
+[![Coverage Status](https://coveralls.io/repos/github/littledot/mockhiato/badge.svg?branch=master)](https://coveralls.io/github/littledot/mockhiato?branch=master)
 [![Go Doc](https://godoc.org/github.com/littledot/mockhiato?status.svg)](http://godoc.org/github.com/littledot/mockhiato)
 
 Mockhiato is a mock generation CLI tool for the Go programming language. It is designed to be fast and configurable.

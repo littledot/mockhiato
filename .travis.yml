@@ -19,8 +19,9 @@ matrix:
   - go: master
 
 script:
-  - go test -v ./...
-after_script:
+  - ./cmd/cover_multiple_packages.sh
+after_success:
+  - bash <(curl -s https://codecov.io/bash)
   - ./cmd/go_report_card.sh
 
 notifications:
