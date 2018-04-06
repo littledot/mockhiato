@@ -1,13 +1,13 @@
 package clean
 
 import (
-	"fmt"
 	"os"
 	"path/filepath"
 	"strings"
 
 	"github.com/littledot/mockhiato/lib"
 	"github.com/littledot/mockhiato/lib/plugin/github.com/stretchr/testify"
+	log "github.com/sirupsen/logrus"
 )
 
 // Run executes the command.
@@ -32,7 +32,7 @@ func Run(config lib.Config) {
 		}
 		defer file.Close()
 		if formatter.IsMockFile(file) { // Formatter says its a mock? Remove
-			fmt.Println("Removing", filePath)
+			log.Infof("Remove %s", filePath)
 			if err := os.Remove(filePath); err != nil {
 				panic(err)
 			}
