@@ -19,7 +19,7 @@ matrix:
   - go: master
 
 script:
-  - go test -v ./... -coverpkg=./... -coverprofile=coverage.txt -covermode=atomic
+  - ./cmd/cover_multiple_packages.sh
 after_success:
   - bash <(curl -s https://codecov.io/bash)
   - ./cmd/go_report_card.sh
