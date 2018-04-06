@@ -64,7 +64,7 @@ func (r *PackageMapper) RecordDependency(tPackage *types.Package) string {
 		return alias
 	}
 
-	name := (*types.Package).Name(tPackage)
+	name := tPackage.Name()
 	alias := name
 	for i := 1; ; i++ {
 		if _, exists := r.usedAliases[alias]; !exists {

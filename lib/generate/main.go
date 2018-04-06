@@ -9,7 +9,7 @@ import (
 func Run(config lib.Config) {
 	log.Infof("Running generate")
 
-	project := &lib.Project{}
+	project := lib.NewProject()
 	oracle := NewOracle(config)
 	oracle.ScanProject(project)
 	oracle.TypeCheckProject(project)
