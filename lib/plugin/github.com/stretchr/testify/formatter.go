@@ -162,7 +162,7 @@ func (r *testifyFormatter) generateMock(project *lib.Project, pkg *types.Package
 	// Format generated code
 	sourceCode, err := format.Source(buf.Bytes())
 	if err != nil {
-		log.Debugf("Format code: %s", buf.Bytes())
+		log.Errorf("Unformattable code: %s", buf.Bytes())
 		panic(err)
 	}
 
