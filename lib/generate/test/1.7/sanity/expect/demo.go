@@ -5,8 +5,8 @@ import (
 	"encoding/json"
 )
 
-// Target is an interface that should be mocked.
-type Target interface {
+// Primitives is an interface that should be mocked.
+type Primitives interface {
 	// All Go types should be supported
 	Error(error) error
 	Bool(bool) bool
@@ -30,7 +30,7 @@ type Target interface {
 	VariadicSlice(...[][][]string)
 }
 
-// B is an interface that should be mocked
-type B interface {
+// Dependencies is an interface that should be mocked
+type Dependencies interface {
 	No(*json.Decoder) *bytes.Buffer
 }

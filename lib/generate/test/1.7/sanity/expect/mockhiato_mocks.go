@@ -7,14 +7,14 @@ import (
 	mock "github.com/stretchr/testify/mock"
 )
 
-// NewBMock creates a new BMock
-func NewBMock() *BMock { return &BMock{} }
+// NewDependenciesMock creates a new DependenciesMock
+func NewDependenciesMock() *DependenciesMock { return &DependenciesMock{} }
 
-// BMock implements example.B
-type BMock struct{ mock.Mock }
+// DependenciesMock implements example.Dependencies
+type DependenciesMock struct{ mock.Mock }
 
-// No implements (example.B).No
-func (r *BMock) No(p0 *json.Decoder) *bytes.Buffer {
+// No implements (example.Dependencies).No
+func (r *DependenciesMock) No(p0 *json.Decoder) *bytes.Buffer {
 	ret := r.Called(p0)
 	var ret0 *bytes.Buffer
 	if a := ret.Get(0); a != nil {
@@ -23,14 +23,14 @@ func (r *BMock) No(p0 *json.Decoder) *bytes.Buffer {
 	return ret0
 }
 
-// NewTargetMock creates a new TargetMock
-func NewTargetMock() *TargetMock { return &TargetMock{} }
+// NewPrimitivesMock creates a new PrimitivesMock
+func NewPrimitivesMock() *PrimitivesMock { return &PrimitivesMock{} }
 
-// TargetMock implements example.Target
-type TargetMock struct{ mock.Mock }
+// PrimitivesMock implements example.Primitives
+type PrimitivesMock struct{ mock.Mock }
 
-// Bool implements (example.Target).Bool
-func (r *TargetMock) Bool(p0 bool) bool {
+// Bool implements (example.Primitives).Bool
+func (r *PrimitivesMock) Bool(p0 bool) bool {
 	ret := r.Called(p0)
 	var ret0 bool
 	if a := ret.Get(0); a != nil {
@@ -39,8 +39,8 @@ func (r *TargetMock) Bool(p0 bool) bool {
 	return ret0
 }
 
-// Byte implements (example.Target).Byte
-func (r *TargetMock) Byte(p0 byte, p1 rune, p2 string) (byte, rune, string) {
+// Byte implements (example.Primitives).Byte
+func (r *PrimitivesMock) Byte(p0 byte, p1 rune, p2 string) (byte, rune, string) {
 	ret := r.Called(p0, p1, p2)
 	var ret0 byte
 	if a := ret.Get(0); a != nil {
@@ -57,8 +57,8 @@ func (r *TargetMock) Byte(p0 byte, p1 rune, p2 string) (byte, rune, string) {
 	return ret0, ret1, ret2
 }
 
-// Chan implements (example.Target).Chan
-func (r *TargetMock) Chan(p0 chan int) chan bool {
+// Chan implements (example.Primitives).Chan
+func (r *PrimitivesMock) Chan(p0 chan int) chan bool {
 	ret := r.Called(p0)
 	var ret0 chan bool
 	if a := ret.Get(0); a != nil {
@@ -67,8 +67,8 @@ func (r *TargetMock) Chan(p0 chan int) chan bool {
 	return ret0
 }
 
-// Complex implements (example.Target).Complex
-func (r *TargetMock) Complex(p0 complex64, p1 complex128) (complex64, complex128) {
+// Complex implements (example.Primitives).Complex
+func (r *PrimitivesMock) Complex(p0 complex64, p1 complex128) (complex64, complex128) {
 	ret := r.Called(p0, p1)
 	var ret0 complex64
 	if a := ret.Get(0); a != nil {
@@ -81,8 +81,8 @@ func (r *TargetMock) Complex(p0 complex64, p1 complex128) (complex64, complex128
 	return ret0, ret1
 }
 
-// Error implements (example.Target).Error
-func (r *TargetMock) Error(p0 error) error {
+// Error implements (example.Primitives).Error
+func (r *PrimitivesMock) Error(p0 error) error {
 	ret := r.Called(p0)
 	var ret0 error
 	if a := ret.Get(0); a != nil {
@@ -91,8 +91,8 @@ func (r *TargetMock) Error(p0 error) error {
 	return ret0
 }
 
-// Float implements (example.Target).Float
-func (r *TargetMock) Float(p0 float32, p1 float64) (float32, float64) {
+// Float implements (example.Primitives).Float
+func (r *PrimitivesMock) Float(p0 float32, p1 float64) (float32, float64) {
 	ret := r.Called(p0, p1)
 	var ret0 float32
 	if a := ret.Get(0); a != nil {
@@ -105,8 +105,8 @@ func (r *TargetMock) Float(p0 float32, p1 float64) (float32, float64) {
 	return ret0, ret1
 }
 
-// Func implements (example.Target).Func
-func (r *TargetMock) Func(p0 func(int) bool) func(int) bool {
+// Func implements (example.Primitives).Func
+func (r *PrimitivesMock) Func(p0 func(int) bool) func(int) bool {
 	ret := r.Called(p0)
 	var ret0 func(int) bool
 	if a := ret.Get(0); a != nil {
@@ -115,8 +115,8 @@ func (r *TargetMock) Func(p0 func(int) bool) func(int) bool {
 	return ret0
 }
 
-// Hello implements (example.Target).Hello
-func (r *TargetMock) Hello(p0 string) (int, bool) {
+// Hello implements (example.Primitives).Hello
+func (r *PrimitivesMock) Hello(p0 string) (int, bool) {
 	ret := r.Called(p0)
 	var ret0 int
 	if a := ret.Get(0); a != nil {
@@ -129,8 +129,8 @@ func (r *TargetMock) Hello(p0 string) (int, bool) {
 	return ret0, ret1
 }
 
-// Int implements (example.Target).Int
-func (r *TargetMock) Int(p0 int, p1 int8, p2 int16, p3 int32, p4 int64) (int, int8, int16, int32, int64) {
+// Int implements (example.Primitives).Int
+func (r *PrimitivesMock) Int(p0 int, p1 int8, p2 int16, p3 int32, p4 int64) (int, int8, int16, int32, int64) {
 	ret := r.Called(p0, p1, p2, p3, p4)
 	var ret0 int
 	if a := ret.Get(0); a != nil {
@@ -155,8 +155,8 @@ func (r *TargetMock) Int(p0 int, p1 int8, p2 int16, p3 int32, p4 int64) (int, in
 	return ret0, ret1, ret2, ret3, ret4
 }
 
-// Interface implements (example.Target).Interface
-func (r *TargetMock) Interface(p0 interface{}) interface{} {
+// Interface implements (example.Primitives).Interface
+func (r *PrimitivesMock) Interface(p0 interface{}) interface{} {
 	ret := r.Called(p0)
 	var ret0 interface{}
 	if a := ret.Get(0); a != nil {
@@ -165,8 +165,8 @@ func (r *TargetMock) Interface(p0 interface{}) interface{} {
 	return ret0
 }
 
-// Map implements (example.Target).Map
-func (r *TargetMock) Map(p0 map[int]bool) map[int]bool {
+// Map implements (example.Primitives).Map
+func (r *PrimitivesMock) Map(p0 map[int]bool) map[int]bool {
 	ret := r.Called(p0)
 	var ret0 map[int]bool
 	if a := ret.Get(0); a != nil {
@@ -175,8 +175,8 @@ func (r *TargetMock) Map(p0 map[int]bool) map[int]bool {
 	return ret0
 }
 
-// Ptr implements (example.Target).Ptr
-func (r *TargetMock) Ptr(p0 uintptr) uintptr {
+// Ptr implements (example.Primitives).Ptr
+func (r *PrimitivesMock) Ptr(p0 uintptr) uintptr {
 	ret := r.Called(p0)
 	var ret0 uintptr
 	if a := ret.Get(0); a != nil {
@@ -185,8 +185,8 @@ func (r *TargetMock) Ptr(p0 uintptr) uintptr {
 	return ret0
 }
 
-// Slice implements (example.Target).Slice
-func (r *TargetMock) Slice(p0 []int) []bool {
+// Slice implements (example.Primitives).Slice
+func (r *PrimitivesMock) Slice(p0 []int) []bool {
 	ret := r.Called(p0)
 	var ret0 []bool
 	if a := ret.Get(0); a != nil {
@@ -195,8 +195,8 @@ func (r *TargetMock) Slice(p0 []int) []bool {
 	return ret0
 }
 
-// Uint implements (example.Target).Uint
-func (r *TargetMock) Uint(p0 uint, p1 uint8, p2 uint16, p3 uint32, p4 uint64) (uint, uint8, uint16, uint32, uint64) {
+// Uint implements (example.Primitives).Uint
+func (r *PrimitivesMock) Uint(p0 uint, p1 uint8, p2 uint16, p3 uint32, p4 uint64) (uint, uint8, uint16, uint32, uint64) {
 	ret := r.Called(p0, p1, p2, p3, p4)
 	var ret0 uint
 	if a := ret.Get(0); a != nil {
@@ -221,14 +221,14 @@ func (r *TargetMock) Uint(p0 uint, p1 uint8, p2 uint16, p3 uint32, p4 uint64) (u
 	return ret0, ret1, ret2, ret3, ret4
 }
 
-// VariadicSlice implements (example.Target).VariadicSlice
-func (r *TargetMock) VariadicSlice(p0 ...[][][]string) {
+// VariadicSlice implements (example.Primitives).VariadicSlice
+func (r *PrimitivesMock) VariadicSlice(p0 ...[][][]string) {
 	r.Called(p0)
 	return
 }
 
-// World implements (example.Target).World
-func (r *TargetMock) World(p0 int, p1 ...string) map[int]interface{} {
+// World implements (example.Primitives).World
+func (r *PrimitivesMock) World(p0 int, p1 ...string) map[int]interface{} {
 	ret := r.Called(p0, p1)
 	var ret0 map[int]interface{}
 	if a := ret.Get(0); a != nil {
