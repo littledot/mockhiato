@@ -81,6 +81,16 @@ func (r *TargetMock) Complex(p0 complex64, p1 complex128) (complex64, complex128
 	return ret0, ret1
 }
 
+// Error implements (example.Target).Error
+func (r *TargetMock) Error(p0 error) error {
+	ret := r.Called(p0)
+	var ret0 error
+	if a := ret.Get(0); a != nil {
+		ret0 = a.(error)
+	}
+	return ret0
+}
+
 // Float implements (example.Target).Float
 func (r *TargetMock) Float(p0 float32, p1 float64) (float32, float64) {
 	ret := r.Called(p0, p1)
