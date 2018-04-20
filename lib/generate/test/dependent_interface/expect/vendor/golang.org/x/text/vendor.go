@@ -1,4 +1,4 @@
-package bigdot
+package text
 
 // VendorDep is a vendor dependency
 type VendorDep interface {
