@@ -4,8 +4,11 @@ import (
 	"io/ioutil"
 	"os/exec"
 	"path/filepath"
+	"runtime"
+	"strings"
 	"testing"
 
+	"github.com/blang/semver"
 	"github.com/littledot/mockhiato/lib"
 	"github.com/littledot/mockhiato/lib/generate"
 	"github.com/stretchr/testify/assert"
@@ -14,35 +17,53 @@ import (
 func TestGenerate(t *testing.T) {
 	a := assert.New(t)
 
-	testPath := "test"
-	files, err := ioutil.ReadDir(testPath)
+	testsPath := "test"
+	files, err := ioutil.ReadDir(testsPath)
 	if err != nil {
 		a.FailNow(err.Error())
 	}
 
-	for _, file := range files {
-		if !file.IsDir() {
+	for _, verFile := range files {
+		if !verFile.IsDir() {
 			continue
 		}
+		minGoVer, err := semver.ParseTolerant(verFile.Name())
+		a.NoError(err)
 
-		t.Run(file.Name(), func(t *testing.T) {
-			actualPath := filepath.Join(testPath, file.Name(), "actual")
+		goVer, err := semver.ParseTolerant(strings.TrimPrefix(runtime.Version(), "go"))
+		a.NoError(err)
 
-			config := lib.Config{}
-			config.ProjectPath = actualPath
-			config.MockFileName = "mockhiato_mocks.go"
-			config.DependentMocksPath = "mocks"
-			config.StructNameFormat = "{interface}Mock"
-			config.DependentPackageNameFormat = "m{package}"
+		if goVer.GTE(minGoVer) {
+			verPath := filepath.Join(testsPath, verFile.Name())
+			testFiles, err := ioutil.ReadDir(verPath)
+			a.NoError(err)
 
-			generate.Run(config)
+			for _, testFile := range testFiles {
+				if !testFile.IsDir() {
+					continue
+				}
 
-			expectPath := filepath.Join(testPath, file.Name(), "expect")
-			cmd := exec.Command("diff", "-r", expectPath, actualPath)
-			if stdout, err := cmd.CombinedOutput(); err != nil {
-				a.Error(err)
-				a.Fail(string(stdout))
+				t.Run(testFile.Name(), func(t *testing.T) {
+					actualPath := filepath.Join(verPath, testFile.Name(), "actual")
+
+					config := lib.Config{}
+					config.ProjectPath = actualPath
+					config.MockFileName = "mockhiato_mocks.go"
+					config.DependentMocksPath = "mocks"
+					config.StructNameFormat = "{interface}Mock"
+					config.DependentPackageNameFormat = "m{package}"
+
+					generate.Run(config)
+
+					expectPath := filepath.Join(verPath, testFile.Name(), "expect")
+					cmd := exec.Command("diff", "-r", expectPath, actualPath)
+					if stdout, err := cmd.CombinedOutput(); err != nil {
+						a.Error(err)
+						a.Fail(string(stdout))
+					}
+				})
 			}
-		})
+		}
 	}
+
 }

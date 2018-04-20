@@ -8,6 +8,7 @@ import (
 // Target is an interface that should be mocked.
 type Target interface {
 	// All Go types should be supported
+	Error(error) error
 	Bool(bool) bool
 	Interface(interface{}) interface{}
 	Ptr(uintptr) uintptr
