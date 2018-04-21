@@ -16,5 +16,5 @@ coverage.txt
 vendor/*
 
 # Mockhiato tests
-**/test/**/actual/**/mockhiato_mocks.go
-!**/test/**/vendor/
+**/testdata/**/actual/**/mockhiato_mocks.go
+!**/testdata/**/vendor/

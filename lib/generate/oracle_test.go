@@ -17,7 +17,7 @@ import (
 func TestGenerate(t *testing.T) {
 	a := assert.New(t)
 
-	testsPath := "test"
+	testsPath := "testdata"
 	files, err := ioutil.ReadDir(testsPath)
 	if err != nil {
 		a.FailNow(err.Error())
