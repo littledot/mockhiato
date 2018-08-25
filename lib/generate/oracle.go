@@ -72,12 +72,7 @@ func (r *Oracle) TypeCheckProject(project *lib.Project) {
 		}
 
 		defInterfaces := getInterfaces(pkgInfo.Info.Defs)
-		num := len(defInterfaces)
-		if num == 0 { // 0 interfaces defined? Skip
-			log.Debugf("Ignore package %s because it has 0 interfaces", pkgPath)
-			continue
-		}
-		log.Debugf("Check %d interface(s) defined in %s", num, pkgPath)
+		log.Debugf("Check %d interface(s) defined in %s", len(defInterfaces), pkgPath)
 		r.recordInterfaces(project, defInterfaces)
 
 		useInterfaces := getInterfaces(pkgInfo.Info.Uses)
