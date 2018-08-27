@@ -52,6 +52,7 @@ func TestGenerate(t *testing.T) {
 					config.DependentMocksPath = "mocks"
 					config.StructNameFormat = "{interface}Mock"
 					config.DependentPackageNameFormat = "m{package}"
+					config.MockFunctionMethodNameFormat = "{func}Run"
 
 					generate.Run(config)
 

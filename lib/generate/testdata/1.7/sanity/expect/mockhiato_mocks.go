@@ -243,3 +243,27 @@ func (r *PrimitivesMock) World(p0 int, p1 ...string) map[int]interface{} {
 	}
 	return ret0
 }
+
+// NewFunctionsMock creates a new FunctionsMock
+func NewFunctionsMock() *FunctionsMock { return &FunctionsMock{} }
+
+// FunctionsMock implements example.Functions
+type FunctionsMock struct{ mock.Mock }
+
+// FunctionsRun implements (example.Functions).FunctionsRun
+func (r *FunctionsMock) FunctionsRun(p0 int, p1 []int, p2 ...[][]int) (byte, []byte, [][]byte) {
+	ret := r.Called(p0, p1, p2)
+	var ret0 byte
+	if a := ret.Get(0); a != nil {
+		ret0 = a.(byte)
+	}
+	var ret1 []byte
+	if a := ret.Get(1); a != nil {
+		ret1 = a.([]byte)
+	}
+	var ret2 [][]byte
+	if a := ret.Get(2); a != nil {
+		ret2 = a.([][]byte)
+	}
+	return ret0, ret1, ret2
+}
