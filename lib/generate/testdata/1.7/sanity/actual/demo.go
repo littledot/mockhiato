@@ -37,3 +37,6 @@ type Dependencies interface {
 	GoDependency(*json.Decoder) *bytes.Buffer
 	VendorDependency(assert.TestingT)
 }
+
+// Functions is a function that should be mocked
+type Functions func(int, []int, ...[][]int) (byte, []byte, [][]byte)

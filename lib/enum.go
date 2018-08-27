@@ -7,4 +7,6 @@ const (
 	InterfaceNameToken = "{interface}"
 	// PackageNameToken is a placeholder used in configs.
 	PackageNameToken = "{package}"
+	// FuncNameToken is a placeholder used in configs.
+	FuncNameToken = "{func}"
 )

@@ -48,15 +48,34 @@ type Package struct {
 	TPackage *types.Package
 	// Interfaces contains interface definitions found in the package.
 	Interfaces []*Interface
+	// Signatures contains signature definitions found in the package.
+	Signatures []*Signature
 }
 
 // NewPackage constructor
 func NewPackage(p *types.Package) *Package {
-	return &Package{p, []*Interface{}}
+	return &Package{p, []*Interface{}, []*Signature{}}
 }
 
 // Interface contains metadata for an interface definition. Formatters rely on this to generate mocks.
 type Interface struct {
 	TObject    types.Object
 	TInterface *types.Interface
+}
+
+// Signature contains metadata for a typed function. Formatters rely on this to generate mocks.
+// Given a typed function,
+//  type Example func(int) error
+// Formatters should generate a struct that implements the function's signature.
+//  type ExampleMock struct { mock.Mock }
+//  func (r *ExampleMock) Run(int) error { ... }
+// Users can then use the generated struct to set up expectations and verify behavior of function parameters.
+//  func Test(t *testing.T) {
+//    mock := &ExampleMock{}
+//    mock.On("Run", 123).Return(io.EOF)
+//    app.Execute(mock.Run)
+//  }
+type Signature struct {
+	TObject    types.Object
+	TSignature *types.Signature
 }

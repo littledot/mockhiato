@@ -19,8 +19,6 @@ type Oracle struct {
 	formatter lib.Formatter
 
 	config lib.Config
-	// allMockedInterfaces indexes interfaces that will be mocked
-	allMockedInterfaces map[types.Object]*lib.Interface
 }
 
 // NewOracle creates a new oracle.
@@ -28,7 +26,6 @@ func NewOracle(config lib.Config) *Oracle {
 	return &Oracle{
 		testify.NewTestifyFormatter(config),
 		config,
-		map[types.Object]*lib.Interface{},
 	}
 }
 
@@ -64,6 +61,7 @@ func (r *Oracle) TypeCheckProject(project *lib.Project) {
 		panic(err)
 	}
 
+	finder := NewMockFinder()
 	// Find interfaces defined by project
 	for _, pkgInfo := range program.AllPackages {
 		pkgPath := pkgInfo.Pkg.Path()
@@ -71,42 +69,17 @@ func (r *Oracle) TypeCheckProject(project *lib.Project) {
 			continue
 		}
 
-		defInterfaces := getInterfaces(pkgInfo.Info.Defs)
-		log.Debugf("Check %d interface(s) defined in %s", len(defInterfaces), pkgPath)
-		r.recordInterfaces(project, defInterfaces)
-
-		useInterfaces := getInterfaces(pkgInfo.Info.Uses)
-		log.Debugf("Check %d interface(s) used in %s", len(useInterfaces), pkgPath)
-		r.recordInterfaces(project, useInterfaces)
+		finder.findMockable(pkgInfo.Info.Defs)
+		finder.findMockable(pkgInfo.Info.Uses)
 	}
 
+	project.Packages = finder.packages
 	for _, pkg := range project.Packages {
 		sort.Sort(byInterfaceName(pkg.Interfaces))
+		sort.Sort(bySignatureName(pkg.Signatures))
 	}
 
 	logTypeCheckProjectResults(project)
-}
-
-func (r *Oracle) recordInterfaces(project *lib.Project, interfaces []*lib.Interface) {
-	for _, iface := range interfaces {
-		if _, exists := r.allMockedInterfaces[iface.TObject]; exists { // Interface already indexed? Skip
-			log.Debugf("Ignore interface %s because it is already indexed", iface.TObject.Name())
-			continue
-		}
-
-		tPkg := iface.TObject.Pkg()
-		pkg := project.Packages[tPkg]
-		if pkg == nil {
-			pkg = lib.NewPackage(tPkg)
-			project.Packages[tPkg] = pkg
-			log.Debugf("Record package: %s (%s)", tPkg.Name(), tPkg.Path())
-
-		}
-		pkg.Interfaces = append(pkg.Interfaces, iface)
-		log.Debugf("Record interface: %s", iface.TObject.Name())
-
-		r.allMockedInterfaces[iface.TObject] = iface
-	}
 }
 
 // GenerateMocks generate mocks for the project
@@ -116,24 +89,25 @@ func (r *Oracle) GenerateMocks(project *lib.Project) {
 	logGenerateMocksResults(project)
 }
 
-// getInterfaces returns interfaces in the package.
-func getInterfaces(objs map[*ast.Ident]types.Object) []*lib.Interface {
-	interfaces := []*lib.Interface{}
-	for _, def := range filterInterfaces(objs) {
-		interfaceDef := def.Type().Underlying().(*types.Interface).Complete()
-		iface := &lib.Interface{
-			TObject:    def,
-			TInterface: interfaceDef,
-		}
-		interfaces = append(interfaces, iface)
-	}
-	return interfaces
+// MockFinder finds objects that can be mocked.
+type MockFinder struct {
+	packages map[*types.Package]*lib.Package
+
+	// allMockables indexes interfaces that will be mocked
+	allMockables map[types.Object]int
 }
 
-// filterInterfaces returns interfaces.
-func filterInterfaces(objs map[*ast.Ident]types.Object) map[*ast.Ident]types.Object {
-	interfaces := map[*ast.Ident]types.Object{}
-	for ident, obj := range objs {
+// NewMockFinder constructor.
+func NewMockFinder() *MockFinder {
+	return &MockFinder{
+		packages:     map[*types.Package]*lib.Package{},
+		allMockables: map[types.Object]int{},
+	}
+}
+
+// findMockable indexes objects that can be mocked.
+func (r *MockFinder) findMockable(objs map[*ast.Ident]types.Object) {
+	for _, obj := range objs {
 		if obj == nil {
 			continue
 		}
@@ -143,12 +117,68 @@ func filterInterfaces(objs map[*ast.Ident]types.Object) map[*ast.Ident]types.Obj
 		if _, ok := obj.(*types.TypeName); !ok {
 			continue
 		}
-		if !types.IsInterface(obj.Type()) {
-			continue
+
+		switch v := obj.Type().Underlying().(type) {
+		case *types.Interface:
+			if _, exists := r.allMockables[obj]; exists { // Interface already indexed? Skip
+				log.Debugf("Ignore interface %s because it is already indexed", obj.Name())
+				continue
+			}
+
+			iface := &lib.Interface{
+				TObject:    obj,
+				TInterface: v.Complete(),
+			}
+			r.recordInterface(iface)
+
+		case *types.Signature:
+			if _, exists := r.allMockables[obj]; exists { // Interface already indexed? Skip
+				log.Debugf("Ignore signature %s because it is already indexed", obj.Name())
+				continue
+			}
+
+			signature := &lib.Signature{
+				TObject:    obj,
+				TSignature: v,
+			}
+			r.recordSignature(signature)
 		}
-		interfaces[ident] = obj
 	}
-	return interfaces
+}
+
+func (r *MockFinder) recordInterface(iface *lib.Interface) {
+	pkg := r.recordPackage(iface.TObject)
+	if pkg == nil {
+		return
+	}
+	pkg.Interfaces = append(pkg.Interfaces, iface)
+	log.Debugf("Record interface: %s", iface.TObject.Name())
+}
+
+func (r *MockFinder) recordSignature(signature *lib.Signature) {
+	pkg := r.recordPackage(signature.TObject)
+	if pkg == nil {
+		return
+	}
+	pkg.Signatures = append(pkg.Signatures, signature)
+	log.Debugf("Record signature: %s", signature.TObject.Name())
+}
+
+func (r *MockFinder) recordPackage(obj types.Object) *lib.Package {
+	if _, exists := r.allMockables[obj]; exists { // Interface already recorded? Skip
+		log.Debugf("Ignore object %s because it is already recorded", obj.Name())
+		return nil
+	}
+	r.allMockables[obj]++
+
+	tPkg := obj.Pkg()
+	pkg := r.packages[tPkg]
+	if pkg == nil {
+		pkg = lib.NewPackage(tPkg)
+		r.packages[tPkg] = pkg
+		log.Debugf("Record package: %s (%s)", tPkg.Name(), tPkg.Path())
+	}
+	return pkg
 }
 
 func logScanProjectResults(project *lib.Project) {
