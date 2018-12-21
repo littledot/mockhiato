@@ -12,16 +12,13 @@ import (
 type MockFinder struct {
 	packages map[*types.Package]*lib.Package
 
-	// allMockables indexes interfaces that will be mocked
+	// allMockables indexes objects that will be mocked
 	allMockables map[types.Object]int
 }
 
 // NewMockFinder constructor.
 func NewMockFinder() *MockFinder {
-	return &MockFinder{
-		packages:     map[*types.Package]*lib.Package{},
-		allMockables: map[types.Object]int{},
-	}
+	return &MockFinder{map[*types.Package]*lib.Package{}, map[types.Object]int{}}
 }
 
 // findMockable indexes objects that can be mocked.
