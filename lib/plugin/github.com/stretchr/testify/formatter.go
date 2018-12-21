@@ -16,9 +16,7 @@ import (
 
 // NewTestifyFormatter creates a new testifyFormatter
 func NewTestifyFormatter(config lib.Config) lib.Formatter {
-	return &testifyFormatter{
-		config: config,
-	}
+	return &testifyFormatter{config}
 }
 
 type testifyFormatter struct {
